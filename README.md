@@ -13,6 +13,82 @@ The agent is a [Strands](https://strandsagents.com/) agent running on the
 mints outbound tokens via **AgentCore Identity**, and can filter which tools
 each organization sees with **Amazon Verified Permissions (AVP)**.
 
+## Quick start — what to run
+
+Pick the level you want. Each step builds on the previous one, but you can stop
+at any level and still have something working.
+
+### Level 0 — See the UI, no AWS, nothing installed but Python
+
+```bash
+cd static
+python -m http.server 8000
+# open http://localhost:8000, sign in with any email + code 123456
+```
+
+The app runs in **Demo mode** (mocked replies) — good for seeing the animated
+frontend and the "How it works" panel.
+
+### Level 1 — Run the real backend locally (still no AWS)
+
+In a **first** terminal, start the backend tools API:
+
+```bash
+python backend/server.py            # http://localhost:8080
+```
+
+Point the frontend at it by setting `BACKEND_API_URL` in `static/config.js`:
+
+```js
+BACKEND_API_URL: 'http://localhost:8080',
+```
+
+Then in a **second** terminal serve the frontend (as in Level 0). Sign in with
+any email + `123456` and ask "which volunteers are available?" — answers now
+come from the real backend handlers + seed data. Badge shows **Live backend
+data**.
+
+### Level 2 — Deploy the backend to AWS (Lambda + API Gateway)
+
+Requires the AWS CLI + AWS SAM CLI configured with credentials.
+
+```bash
+cd backend
+sam build
+sam deploy                          # stack: good-neighbor-backend (us-east-1)
+```
+
+Copy the `ApiBaseUrl` from the output into `static/config.js` as
+`BACKEND_API_URL`. The frontend now talks to your live AWS backend.
+Tear it down later with:
+
+```bash
+sam delete --stack-name good-neighbor-backend --region us-east-1
+```
+
+### Level 3 — Deploy the frontend to AWS Amplify Hosting
+
+Push this repo to your Git provider, then in the **Amplify console**:
+*New app → Host web app → connect the repo → deploy*. Amplify auto-detects
+[`amplify.yml`](amplify.yml) and publishes `static/` over HTTPS + CDN.
+
+### Level 4 — Deploy the full agent (Claude via AgentCore)
+
+Requires the **`bootstrap-stack`** and the **AgentCore CLI** (see
+[Prerequisites](#prerequisites)).
+
+```bash
+cd static/AgentCode
+./launchAgent.sh                    # deploys the runtime + publishes the frontend
+```
+
+This is the complete architecture: browser → Cognito → AgentCore Runtime →
+Claude → Gateway (MCP) → your backend tools. See
+[Deploying the agent](#deploying-the-agent) for details.
+
+> New here? Do **Level 0** first (10 seconds), then **Level 1** to see real
+> data. Levels 2–4 add AWS one piece at a time.
+
 ## What it can do
 
 - **Donation & food-safety guidelines** — acceptance rules and safe donation
@@ -50,6 +126,9 @@ Example questions the agent can answer (only from live tool data):
 ```
 .
 ├── README.md                     # This file
+├── amplify.yml                   # AWS Amplify Hosting build spec (publishes static/)
+├── docs/
+│   └── architecture.drawio       # Editable AWS architecture diagram
 ├── schemas/                      # OpenAPI + Lambda schemas for gateway targets
 │   ├── README.md                 # Detailed schema documentation
 │   ├── get-guidelines-lambda.json      # Donation & food-safety guidelines (Lambda)
@@ -62,16 +141,19 @@ Example questions the agent can answer (only from live tool data):
 ├── backend/                      # Tool implementations + seed data (the tools the agent calls)
 │   ├── README.md                 # Backend structure, data model, run + deploy
 │   ├── server.py                 # Local dev server (no AWS) exposing every tool
+│   ├── lambda_function.py        # AWS Lambda entrypoint (routes by path)
+│   ├── template.yaml             # AWS SAM template (Lambda + HTTP API Gateway)
+│   ├── samconfig.toml            # SAM deploy defaults (stack name, region)
 │   ├── common.py                 # Shared data-loading + response helpers
 │   ├── data/                     # Real seed data (resources, surplus, needs, pantry, volunteers, vehicles, guidelines)
 │   └── handlers/                 # guidelines · community · pantry · logistics
-└── static/                       # Frontend SPA (served from S3 + CloudFront)
+└── static/                       # Frontend SPA (deploy via Amplify, or S3 + CloudFront)
     ├── index.html                # Login + chat UI + "How it works" panel
-    ├── app.js                    # Cognito sign-in + AgentCore invoke + rendering
-    ├── styles.css                # Chat UI styling
-    ├── config.js                 # Runtime config (regenerated at deploy time)
+    ├── app.js                    # Cognito sign-in + AgentCore/backend calls + rendering
+    ├── styles.css                # Animated chat UI styling
+    ├── config.js                 # Runtime config (Cognito, AgentCore, BACKEND_API_URL)
     ├── README.md                 # Frontend integration + how-it-works docs
-    └── AgentCode/                # The deployable agent
+    └── AgentCode/                # The deployable agent (not published to the web)
         ├── agent.py              # Strands agent + AgentCore Runtime entrypoint
         ├── requirements.txt      # Python dependencies
         ├── streamable_http_sigv4.py    # SigV4-signed MCP transport
@@ -79,6 +161,17 @@ Example questions the agent can answer (only from live tool data):
         ├── launchAgent.sh        # End-to-end: venv → deploy → publish frontend
         └── deploy-agentcore-runtime.sh # Configure + launch the AgentCore runtime
 ```
+
+## Architecture diagram
+
+An editable architecture diagram lives at
+[`docs/architecture.drawio`](docs/architecture.drawio). Open it with the
+[draw.io desktop app](https://www.drawio.com/), the VS Code *Draw.io Integration*
+extension, or [app.diagrams.net](https://app.diagrams.net). It shows the full
+flow: browser SPA (Amplify Hosting) → Cognito email-OTP → AgentCore Runtime →
+Strands + Claude → AgentCore Gateway (MCP) with Verified Permissions → the
+deployed API Gateway + Lambda backend and its data, plus the optional direct
+`BACKEND_API_URL` demo path.
 
 ## How the agent works
 

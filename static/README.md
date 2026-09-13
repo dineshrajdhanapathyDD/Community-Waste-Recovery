@@ -110,7 +110,30 @@ python -m http.server 8000
 
 When connected to real AWS, the header shows a green **Connected to AWS** badge.
 
-## Deploying with the backend
+## Deploying to AWS Amplify Hosting
+
+The repo root has an [`amplify.yml`](../amplify.yml) build spec. Since the SPA is
+a no-build static site, Amplify simply publishes the `static/` directory over
+HTTPS + CDN.
+
+1. In the Amplify console, **connect this repository** (or drag-and-drop the
+   `static/` folder for a manual deploy).
+2. Amplify auto-detects `amplify.yml` at the repo root (`baseDirectory: static`).
+3. Deploy — Amplify serves `static/` at `/`.
+
+To inject `config.js` from Amplify environment variables at build time (instead
+of committing real values), set `COGNITO_*`, `AGENTCORE_*`, and `BACKEND_API_URL`
+in **Amplify console → Environment variables** and uncomment the `envsubst`-style
+block in `amplify.yml`.
+
+## Motion & accessibility
+
+The UI uses an animated aurora backdrop, entrance/stagger animations, and glow
+effects. All of it is disabled automatically for users with
+`prefers-reduced-motion: reduce`, so the app stays usable and calm for anyone
+who opts out of motion.
+
+## Deploying with the agent backend (S3 + CloudFront path)
 
 From `static/AgentCode`:
 

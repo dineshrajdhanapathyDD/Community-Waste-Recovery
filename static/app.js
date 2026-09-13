@@ -308,6 +308,17 @@
     return mockReply(prompt);
   }
 
+  // ---- Animation helper ---------------------------------------------------
+  // Re-trigger a CSS entrance animation on an element that was just un-hidden
+  // (toggling `hidden` alone won't replay the animation).
+  function animateIn(node, keyframe) {
+    if (!node) return;
+    node.style.animation = "none";
+    // Force reflow so the browser registers the reset before we re-apply.
+    void node.offsetWidth;
+    node.style.animation = `${keyframe} 0.45s cubic-bezier(0.22, 1, 0.36, 1) both`;
+  }
+
   // ---- Chat rendering -----------------------------------------------------
   function addMessage(role, text, opts) {
     opts = opts || {};
@@ -369,9 +380,10 @@
     try {
       const email = el("email").value.trim();
       await requestEmailCode(email);
-      // Reveal the code step.
+      // Reveal the code step with an entrance animation.
       emailForm.classList.add("hidden");
       otpForm.classList.remove("hidden");
+      animateIn(otpForm, "popIn");
       otpSentTo.textContent = DEMO_MODE
         ? `Demo mode: enter code 123456 for ${email}.`
         : `We sent a code to ${email}. Enter it below.`;
@@ -418,6 +430,7 @@
   function showChat() {
     loginView.classList.add("hidden");
     chatView.classList.remove("hidden");
+    animateIn(chatView.querySelector(".chat-wrap"), "fadeIn");
     logoutBtn.classList.remove("hidden");
     renderSuggestions();
     if (!messages.childElementCount) {

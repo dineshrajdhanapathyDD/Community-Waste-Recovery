@@ -1,0 +1,58 @@
+# AWS Amplify Hosting build spec for the Good Neighbor Agent frontend.
+#
+# The frontend (static/) is a no-build static SPA (plain HTML/CSS/JS), so there
+# is nothing to compile — Amplify just publishes the static/ directory.
+#
+# HOW TO USE
+#   1. In the Amplify console, connect this repository (or drag-and-drop the
+#      static/ folder for a manual deploy).
+#   2. Amplify auto-detects this amplify.yml at the repo root.
+#   3. Deploy. Amplify serves the contents of static/ over HTTPS + CDN.
+#
+# CONFIG NOTE
+#   The SPA reads static/config.js at runtime (Cognito + AgentCore + optional
+#   BACKEND_API_URL). Either commit a real config.js, or overwrite it in the
+#   Amplify build (see the commented "envsubst" example in the build phase).
+#
+# SPA ROUTING
+#   This app is a single index.html, so no rewrite rules are strictly required.
+#   If you later add client-side routes, add a rewrite in the Amplify console:
+#     Source: </^[^.]+$|\.(?!(css|js|json|png|jpg|svg|ico)$)([^.]+$)/>
+#     Target: /index.html   (type: 200 Rewrite)
+
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands:
+        # No dependencies to install for the static site.
+        - echo "No preBuild step — static site."
+    build:
+      commands:
+        - echo "Preparing static site for publish."
+        # IMPORTANT: static/ also contains the backend (AgentCode/) which must
+        # NOT be served to the public web. Remove it from the publish root.
+        # (Amplify artifacts.files has no exclude option, so we prune here.)
+        - rm -rf static/AgentCode
+        - find static -name "__pycache__" -type d -prune -exec rm -rf {} + || true
+        # --- Optional: inject config.js from Amplify environment variables ---
+        # Set these in Amplify console > Environment variables, then uncomment:
+        # - |
+        #   cat > static/config.js <<EOF
+        #   window.WORKSHOP_CONFIG = {
+        #     COGNITO_USER_POOL_ID: '${COGNITO_USER_POOL_ID}',
+        #     COGNITO_CLIENT_ID: '${COGNITO_CLIENT_ID}',
+        #     COGNITO_REGION: '${COGNITO_REGION}',
+        #     AGENTCORE_RUNTIME_ARN: '${AGENTCORE_RUNTIME_ARN}',
+        #     AGENTCORE_ENDPOINT: '${AGENTCORE_ENDPOINT}',
+        #     BACKEND_API_URL: '${BACKEND_API_URL}',
+        #   };
+        #   EOF
+  artifacts:
+    # The published web root. Everything under static/ is served at "/".
+    # (AgentCode/ and __pycache__ are pruned in the build phase above.)
+    baseDirectory: static
+    files:
+      - '**/*'
+  cache:
+    paths: []
