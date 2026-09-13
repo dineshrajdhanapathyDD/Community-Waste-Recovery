@@ -1,7 +1,0 @@
-[
-  { "vehicle_id": "VEH001", "type": "refrigerated", "capacity": "van", "location": "North Side, 60625, IL", "last_safety_check": "22-July-2026" },
-  { "vehicle_id": "VEH002", "type": "standard", "capacity": "car", "location": "Downtown, 60604, IL", "last_safety_check": "05-August-2026" },
-  { "vehicle_id": "VEH003", "type": "standard", "capacity": "box truck", "location": "West Side, 60644, IL", "last_safety_check": "18-February-2026" },
-  { "vehicle_id": "VEH004", "type": "refrigerated", "capacity": "box truck", "location": "East Side, 60617, IL", "last_safety_check": "30-August-2026" },
-  { "vehicle_id": "VEH005", "type": "standard", "capacity": "van", "location": "North Side, 60625, IL", "last_safety_check": "11-January-2026" }
-]

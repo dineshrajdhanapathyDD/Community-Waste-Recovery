@@ -1,0 +1,62 @@
+default_agent: good_neighbor_agent
+agents:
+  good_neighbor_agent:
+    name: good_neighbor_agent
+    language: python
+    node_version: '20'
+    entrypoint: D:/github work/Agent for hackathon waste recovery/static/AgentCode/agent.py
+    deployment_type: container
+    runtime_type: null
+    platform: linux/arm64
+    container_runtime: none
+    source_path: D:\github work\Agent for hackathon waste recovery\static\AgentCode
+    aws:
+      execution_role: arn:aws:iam::466742534146:role/good-neighbor-agent-exec-role
+      execution_role_auto_create: false
+      account: '466742534146'
+      region: us-east-1
+      ecr_repository: 466742534146.dkr.ecr.us-east-1.amazonaws.com/bedrock-agentcore-good_neighbor_agent
+      ecr_auto_create: false
+      s3_path: null
+      s3_auto_create: false
+      network_configuration:
+        network_mode: PUBLIC
+        network_mode_config: null
+      protocol_configuration:
+        server_protocol: HTTP
+      observability:
+        enabled: false
+      lifecycle_configuration:
+        idle_runtime_session_timeout: null
+        max_lifetime: null
+    bedrock_agentcore:
+      agent_id: good_neighbor_agent-m0NZWbGrv5
+      agent_arn: arn:aws:bedrock-agentcore:us-east-1:466742534146:runtime/good_neighbor_agent-m0NZWbGrv5
+      agent_session_id: null
+    codebuild:
+      project_name: bedrock-agentcore-good_neighbor_agent-builder
+      execution_role: arn:aws:iam::466742534146:role/AmazonBedrockAgentCoreSDKCodeBuild-us-east-1-84c49d60dc
+      source_bucket: bedrock-agentcore-codebuild-sources-466742534146-us-east-1
+    memory:
+      mode: NO_MEMORY
+      memory_id: null
+      memory_arn: null
+      memory_name: null
+      event_expiry_days: 30
+      first_invoke_memory_check_done: false
+      was_created_by_toolkit: false
+    identity:
+      credential_providers: []
+      workload: null
+    aws_jwt:
+      enabled: false
+      audiences: []
+      signing_algorithm: ES384
+      issuer_url: null
+      duration_seconds: 300
+    authorizer_configuration: null
+    request_header_configuration: null
+    oauth_configuration: null
+    api_key_env_var_name: null
+    api_key_credential_provider_name: null
+    is_generated_by_agentcore_create: false

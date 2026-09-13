@@ -1,7 +1,10 @@
 # Requirements for the Good Neighbor Agent (community waste recovery)
 # Core AgentCore dependencies
 bedrock-agentcore
-strands-agents
+# Pin Strands to a version with correct Amazon Nova tool-use loop handling.
+# Older builds ended the agent loop after the first tool call (no synthesis
+# turn), so the agent never turned tool data into an answer.
+strands-agents==1.55.1
 bedrock-agentcore-starter-toolkit==0.3.9
 asyncio
 

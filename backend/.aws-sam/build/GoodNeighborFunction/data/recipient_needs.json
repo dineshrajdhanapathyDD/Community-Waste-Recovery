@@ -1,9 +1,0 @@
-[
-  { "need_id": "NEED001", "org_id": "ORG001", "org_name": "North Side Food Bank", "resource_id": "RES001", "resource_name": "Fresh tomatoes", "quantity_needed": "50 lbs", "priority": "high", "location": "500 Elm St, North Side" },
-  { "need_id": "NEED002", "org_id": "ORG001", "org_name": "North Side Food Bank", "resource_id": "RES009", "resource_name": "Canned vegetables", "quantity_needed": "200 cans", "priority": "normal", "location": "500 Elm St, North Side" },
-  { "need_id": "NEED003", "org_id": "ORG002", "org_name": "Hope Street Shelter", "resource_id": "RES005", "resource_name": "Bread loaves", "quantity_needed": "40 loaves", "priority": "high", "location": "88 Hope St, North Side" },
-  { "need_id": "NEED004", "org_id": "ORG002", "org_name": "Hope Street Shelter", "resource_id": "RES014", "resource_name": "Prepared hot meals", "quantity_needed": "60 meals", "priority": "urgent", "location": "88 Hope St, North Side" },
-  { "need_id": "NEED005", "org_id": "ORG003", "org_name": "Eastgate Community Pantry", "resource_id": "RES007", "resource_name": "Milk (gallon)", "quantity_needed": "30 gallons", "priority": "normal", "location": "210 Eastgate Ave, East Side" },
-  { "need_id": "NEED006", "org_id": "ORG003", "org_name": "Eastgate Community Pantry", "resource_id": "RES011", "resource_name": "Canned beans", "quantity_needed": "120 cans", "priority": "low", "location": "210 Eastgate Ave, East Side" },
-  { "need_id": "NEED007", "org_id": "ORG001", "org_name": "North Side Food Bank", "resource_id": "RES015", "resource_name": "Diapers", "quantity_needed": "25 packs", "priority": "high", "location": "500 Elm St, North Side" }
-]

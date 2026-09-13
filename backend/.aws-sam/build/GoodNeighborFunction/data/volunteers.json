@@ -1,8 +1,0 @@
-[
-  { "volunteer_id": "VOL001", "firstname": "Maria", "lastname": "Alvarez", "location": "North Side, 60625, IL", "joined_date": "15-March-2022", "available": true },
-  { "volunteer_id": "VOL002", "firstname": "Devon", "lastname": "Clark", "location": "Downtown, 60604, IL", "joined_date": "02-July-2023", "available": true },
-  { "volunteer_id": "VOL003", "firstname": "Priya", "lastname": "Nair", "location": "East Side, 60617, IL", "joined_date": "20-November-2021", "available": false },
-  { "volunteer_id": "VOL004", "firstname": "Sam", "lastname": "Okafor", "location": "North Side, 60625, IL", "joined_date": "09-January-2024", "available": true },
-  { "volunteer_id": "VOL005", "firstname": "Grace", "lastname": "Bennett", "location": "West Side, 60644, IL", "joined_date": "28-May-2020", "available": true },
-  { "volunteer_id": "VOL006", "firstname": "Tom", "lastname": "Reyes", "location": "Downtown, 60604, IL", "joined_date": "12-August-2023", "available": false }
-]

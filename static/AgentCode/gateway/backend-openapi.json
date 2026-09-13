@@ -1,0 +1,108 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Good Neighbor Backend Tools",
+    "description": "Community waste-recovery tools: surplus listings, resource catalog, recipient needs, pantry levels, volunteers, vehicles, and donation guidelines. Backed by the deployed good-neighbor-backend Lambda + HTTP API.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://h1aly0x3a1.execute-api.us-east-1.amazonaws.com",
+      "description": "Deployed good-neighbor-backend HTTP API"
+    }
+  ],
+  "paths": {
+    "/": {
+      "get": {
+        "operationId": "viewSurplusListings",
+        "summary": "View surplus donation listings",
+        "description": "Returns surplus food and goods that donor organizations have posted as available for recovery.",
+        "responses": {
+          "200": { "description": "Surplus listings", "content": { "application/json": { "schema": { "type": "object" } } } }
+        }
+      }
+    },
+    "/catalog": {
+      "get": {
+        "operationId": "viewResourceCatalog",
+        "summary": "View the community resource catalog",
+        "description": "Returns the categories of food and goods circulating in the community network. Optional filters.",
+        "parameters": [
+          { "name": "category", "in": "query", "required": false, "schema": { "type": "string" }, "description": "Filter by category, e.g. produce, bakery, canned." },
+          { "name": "resource", "in": "query", "required": false, "schema": { "type": "string" }, "description": "Filter by resource name (contains search)." }
+        ],
+        "responses": {
+          "200": { "description": "Resource catalog", "content": { "application/json": { "schema": { "type": "object" } } } }
+        }
+      }
+    },
+    "/needs": {
+      "get": {
+        "operationId": "getRecipientNeeds",
+        "summary": "Get recipient needs",
+        "description": "Returns what food banks, shelters, and partner organizations are currently requesting. Optional filters.",
+        "parameters": [
+          { "name": "resource_id", "in": "query", "required": false, "schema": { "type": "string" }, "description": "Filter needs by a specific resource id, e.g. RES001." },
+          { "name": "org_id", "in": "query", "required": false, "schema": { "type": "string" }, "description": "Filter needs by a specific recipient organization id, e.g. ORG001." }
+        ],
+        "responses": {
+          "200": { "description": "Recipient needs", "content": { "application/json": { "schema": { "type": "object" } } } }
+        }
+      }
+    },
+    "/pantry": {
+      "get": {
+        "operationId": "getPantryLevels",
+        "summary": "Get partner pantry stock levels",
+        "description": "Returns current stock levels at partner food banks and pantries, with a computed low-stock flag. Optional resource filter.",
+        "parameters": [
+          { "name": "resource_id", "in": "query", "required": false, "schema": { "type": "string" }, "description": "Filter pantry levels by a specific resource id, e.g. RES001." }
+        ],
+        "responses": {
+          "200": { "description": "Pantry levels", "content": { "application/json": { "schema": { "type": "object" } } } }
+        }
+      }
+    },
+    "/volunteers": {
+      "get": {
+        "operationId": "getVolunteers",
+        "summary": "Get volunteer drivers",
+        "description": "Returns volunteer drivers, their location and availability. Optional filters.",
+        "parameters": [
+          { "name": "available", "in": "query", "required": false, "schema": { "type": "string" }, "description": "Set to true to return only currently available volunteers." },
+          { "name": "location", "in": "query", "required": false, "schema": { "type": "string" }, "description": "Filter volunteers by location (contains search)." }
+        ],
+        "responses": {
+          "200": { "description": "Volunteers", "content": { "application/json": { "schema": { "type": "object" } } } }
+        }
+      }
+    },
+    "/vehicles": {
+      "get": {
+        "operationId": "getVehicles",
+        "summary": "Get vehicles for pickups and deliveries",
+        "description": "Returns vehicles with type, capacity, location, and maintenance status. Optional filters.",
+        "parameters": [
+          { "name": "capacity", "in": "query", "required": false, "schema": { "type": "string" }, "description": "Filter by capacity class: car, van, or box truck." },
+          { "name": "type", "in": "query", "required": false, "schema": { "type": "string" }, "description": "Filter by vehicle type (contains search), e.g. refrigerated." }
+        ],
+        "responses": {
+          "200": { "description": "Vehicles", "content": { "application/json": { "schema": { "type": "object" } } } }
+        }
+      }
+    },
+    "/guidelines": {
+      "get": {
+        "operationId": "getGuidelines",
+        "summary": "Get donation and food-safety guidelines",
+        "description": "Returns donation and food-safety guideline text for a given type.",
+        "parameters": [
+          { "name": "guideline_type", "in": "query", "required": true, "schema": { "type": "string", "enum": ["Acceptance", "Window", "Handling"] }, "description": "Which guideline to retrieve: Acceptance, Window, or Handling." }
+        ],
+        "responses": {
+          "200": { "description": "Guideline details", "content": { "application/json": { "schema": { "type": "object" } } } }
+        }
+      }
+    }
+  }
+}

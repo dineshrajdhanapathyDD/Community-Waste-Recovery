@@ -1,125 +1,88 @@
 # Good Neighbor Agent — Community Waste Recovery
 
-An AI assistant that helps a whole **community** recover and redistribute
-surplus instead of throwing it away. It serves **groups of people** —
-neighborhoods, nonprofits, food banks, shelters, schools, libraries, and small
-local organizations — by connecting people who have surplus (grocers,
+An AI assistant that helps a whole **community** recover and redistribute surplus
+instead of throwing it away. It connects people who have surplus (grocers,
 restaurants, schools) with people who can use it (food banks, shelters,
-neighbors), and by routing volunteers to move it.
+neighbors), and routes volunteers and vehicles to move it.
 
 The agent is a [Strands](https://strandsagents.com/) agent running on the
-**Amazon Bedrock AgentCore Runtime**. It reaches every backend tool through
-**AgentCore Gateway** (MCP endpoints), authenticates with **Amazon Cognito**,
-mints outbound tokens via **AgentCore Identity**, and can filter which tools
-each organization sees with **Amazon Verified Permissions (AVP)**.
+**Amazon Bedrock AgentCore Runtime** using **Amazon Nova Pro**. It reaches its
+backend tools through an **AgentCore Gateway** (MCP), and those tools serve real
+community data from **AWS Lambda + API Gateway**. A browser SPA lets people sign
+in and chat with it.
 
-## Quick start — what to run
+> **Status:** deployed and verified end to end in AWS (`us-east-1`). Ask the live
+> agent "what are the current pantry stock levels?" and it returns a table built
+> from real backend data.
 
-Pick the level you want. Each step builds on the previous one, but you can stop
-at any level and still have something working.
+---
 
-### Level 0 — See the UI, no AWS, nothing installed but Python
+## Table of contents
 
-```bash
-cd static
-python -m http.server 8000
-# open http://localhost:8000, sign in with any email + code 123456
+- [Architecture](#architecture)
+- [What it can do](#what-it-can-do)
+- [Repository layout](#repository-layout)
+- [What to run (by goal)](#what-to-run-by-goal)
+  - [A. Just see the UI (no AWS)](#a-just-see-the-ui-no-aws)
+  - [B. Run the real backend locally (no AWS)](#b-run-the-real-backend-locally-no-aws)
+  - [C. Deploy the backend to AWS](#c-deploy-the-backend-to-aws)
+  - [D. Deploy the frontend to AWS Amplify](#d-deploy-the-frontend-to-aws-amplify)
+  - [E. Deploy the agent to AgentCore (no Cognito)](#e-deploy-the-agent-to-agentcore-no-cognito)
+  - [F. Wire the agent to the live backend (Gateway)](#f-wire-the-agent-to-the-live-backend-gateway)
+- [Deployed resources (this account)](#deployed-resources-this-account)
+- [How the agent works](#how-the-agent-works)
+- [Configuration reference](#configuration-reference)
+- [Troubleshooting](#troubleshooting)
+- [Teardown](#teardown)
+- [License](#license)
+
+---
+
+## Architecture
+
+```
+Browser SPA (static/, Amplify or S3+CloudFront)
+      │  sign in + chat
+      ▼
+Amazon Cognito (email OTP)  ──JWT──▶  AgentCore Runtime  (Amazon Nova Pro)
+                                            │  Strands agent (agent.py)
+                                            ▼
+                                   AgentCore Gateway (MCP)
+                                            │  openApiSchema target
+                                            ▼
+                          API Gateway + Lambda  (backend/, real data)
 ```
 
-The app runs in **Demo mode** (mocked replies) — good for seeing the animated
-frontend and the "How it works" panel.
+An editable diagram is at [`docs/architecture.drawio`](docs/architecture.drawio)
+(open with the [draw.io desktop app](https://www.drawio.com/), the VS Code
+*Draw.io Integration* extension, or [app.diagrams.net](https://app.diagrams.net)).
 
-### Level 1 — Run the real backend locally (still no AWS)
+There are **two ways** the frontend can reach data, and both are built:
 
-In a **first** terminal, start the backend tools API:
+- **Direct** — the SPA calls the backend API directly (`BACKEND_API_URL`). Great
+  for demos; no agent/LLM involved.
+- **Through the agent** — the SPA calls the AgentCore Runtime; the Nova agent
+  decides which tools to call via the Gateway and answers in natural language.
 
-```bash
-python backend/server.py            # http://localhost:8080
-```
-
-Point the frontend at it by setting `BACKEND_API_URL` in `static/config.js`:
-
-```js
-BACKEND_API_URL: 'http://localhost:8080',
-```
-
-Then in a **second** terminal serve the frontend (as in Level 0). Sign in with
-any email + `123456` and ask "which volunteers are available?" — answers now
-come from the real backend handlers + seed data. Badge shows **Live backend
-data**.
-
-### Level 2 — Deploy the backend to AWS (Lambda + API Gateway)
-
-Requires the AWS CLI + AWS SAM CLI configured with credentials.
-
-```bash
-cd backend
-sam build
-sam deploy                          # stack: good-neighbor-backend (us-east-1)
-```
-
-Copy the `ApiBaseUrl` from the output into `static/config.js` as
-`BACKEND_API_URL`. The frontend now talks to your live AWS backend.
-Tear it down later with:
-
-```bash
-sam delete --stack-name good-neighbor-backend --region us-east-1
-```
-
-### Level 3 — Deploy the frontend to AWS Amplify Hosting
-
-Push this repo to your Git provider, then in the **Amplify console**:
-*New app → Host web app → connect the repo → deploy*. Amplify auto-detects
-[`amplify.yml`](amplify.yml) and publishes `static/` over HTTPS + CDN.
-
-### Level 4 — Deploy the full agent (Claude via AgentCore)
-
-Requires the **`bootstrap-stack`** and the **AgentCore CLI** (see
-[Prerequisites](#prerequisites)).
-
-```bash
-cd static/AgentCode
-./launchAgent.sh                    # deploys the runtime + publishes the frontend
-```
-
-This is the complete architecture: browser → Cognito → AgentCore Runtime →
-Claude → Gateway (MCP) → your backend tools. See
-[Deploying the agent](#deploying-the-agent) for details.
-
-> New here? Do **Level 0** first (10 seconds), then **Level 1** to see real
-> data. Levels 2–4 add AWS one piece at a time.
+---
 
 ## What it can do
 
-- **Donation & food-safety guidelines** — acceptance rules and safe donation
-  windows for prepared food, produce, and packaged goods.
-- **Surplus donation listings** — surplus food and goods posted by donors.
-- **Community resource catalog** — the categories of items circulating in the
-  network.
-- **Recipient needs** — what food banks, shelters, and partners are requesting,
-  so surplus can be matched to real demand.
-- **Pantry / stock levels** — current stock at partner pantries, to spot
-  shortages and prioritize where surplus should go.
-- **Volunteers & vehicles** — available drivers and vehicles (location and
-  capacity) for planning pickups and deliveries.
+The agent answers **only** from live tool data (it does not guess). Its tools:
 
-Example questions the agent can answer (only from live tool data):
+- **Donation & food-safety guidelines** — acceptance rules and safe donation windows.
+- **Surplus donation listings** — surplus food/goods posted by donors.
+- **Community resource catalog** — categories of items circulating in the network.
+- **Recipient needs** — what food banks, shelters, and partners are requesting.
+- **Pantry / stock levels** — current stock at partner pantries (with a low-stock flag).
+- **Volunteers & vehicles** — available drivers and vehicles for pickups/deliveries.
+
+Example question:
 
 > "A grocer has 40 lbs of produce that must be picked up by Friday — which food
-> bank near the north side needs it, and who could drive it there?"
+> bank needs it, and who could drive it there?"
 
-## Design principles
-
-- **Grounded, never guessing.** The agent has no built-in knowledge of the
-  community's data. It states information only when a tool returned it during
-  the current conversation; otherwise it declines with a fixed sentence.
-- **Serves groups, not one user.** Cognito identities represent organizations
-  (donor / recipient / coordinator), and AVP filters tools per organization.
-- **No secrets in code.** Outbound OAuth2 credentials live in the AgentCore
-  Identity vault; the agent exchanges its workload identity for a bearer token
-  at connection time.
-- **Least connection.** Gateways for tools a caller cannot use are never opened,
-  so no unnecessary outbound tokens are minted.
+---
 
 ## Repository layout
 
@@ -129,194 +92,284 @@ Example questions the agent can answer (only from live tool data):
 ├── amplify.yml                   # AWS Amplify Hosting build spec (publishes static/)
 ├── docs/
 │   └── architecture.drawio       # Editable AWS architecture diagram
-├── schemas/                      # OpenAPI + Lambda schemas for gateway targets
-│   ├── README.md                 # Detailed schema documentation
-│   ├── get-guidelines-lambda.json      # Donation & food-safety guidelines (Lambda)
-│   ├── view-surplus-listings-api.json  # Surplus donation listings
-│   ├── view-resource-catalog-api.json  # Community resource catalog
-│   ├── get-recipient-needs-api.json    # Recipient needs / requests
-│   ├── get-pantry-levels-api.json      # Partner pantry stock levels
-│   ├── get-volunteer-api.json          # Volunteer drivers
-│   └── get-vehicle-api.json            # Vehicles for pickup/delivery
-├── backend/                      # Tool implementations + seed data (the tools the agent calls)
+├── schemas/                      # OpenAPI + Lambda schemas (tool contracts)
+├── backend/                      # Tool implementations + real seed data
 │   ├── README.md                 # Backend structure, data model, run + deploy
 │   ├── server.py                 # Local dev server (no AWS) exposing every tool
 │   ├── lambda_function.py        # AWS Lambda entrypoint (routes by path)
 │   ├── template.yaml             # AWS SAM template (Lambda + HTTP API Gateway)
 │   ├── samconfig.toml            # SAM deploy defaults (stack name, region)
-│   ├── common.py                 # Shared data-loading + response helpers
-│   ├── data/                     # Real seed data (resources, surplus, needs, pantry, volunteers, vehicles, guidelines)
+│   ├── common.py                 # Shared data loading + response helpers
+│   ├── data/                     # Seed JSON: resources, surplus, needs, pantry, volunteers, vehicles, guidelines
 │   └── handlers/                 # guidelines · community · pantry · logistics
-└── static/                       # Frontend SPA (deploy via Amplify, or S3 + CloudFront)
+└── static/                       # Frontend SPA (deploy via Amplify or S3+CloudFront)
     ├── index.html                # Login + chat UI + "How it works" panel
     ├── app.js                    # Cognito sign-in + AgentCore/backend calls + rendering
-    ├── styles.css                # Animated chat UI styling
+    ├── styles.css                # Animated chat UI
     ├── config.js                 # Runtime config (Cognito, AgentCore, BACKEND_API_URL)
-    ├── README.md                 # Frontend integration + how-it-works docs
-    └── AgentCode/                # The deployable agent (not published to the web)
-        ├── agent.py              # Strands agent + AgentCore Runtime entrypoint
-        ├── requirements.txt      # Python dependencies
-        ├── streamable_http_sigv4.py    # SigV4-signed MCP transport
-        ├── streamable_http_oauth2.py   # OAuth2 client-credentials MCP transport
-        ├── launchAgent.sh        # End-to-end: venv → deploy → publish frontend
-        └── deploy-agentcore-runtime.sh # Configure + launch the AgentCore runtime
+    ├── README.md                 # Frontend + Amplify deploy docs
+    └── AgentCode/                # The deployable agent (NOT published to the web)
+        ├── agent.py              # Strands agent + AgentCore Runtime entrypoint (Amazon Nova)
+        ├── requirements.txt      # Python dependencies (strands-agents pinned)
+        ├── deploy-agent-noauth.ps1     # Deploy the agent with IAM auth (no Cognito)
+        ├── iam/                        # Standalone execution role trust + permissions
+        ├── gateway/                    # Scripts to wire the Gateway to the backend
+        │   ├── backend-openapi.json    # Combined OpenAPI spec for the 7 tools
+        │   ├── create_target.py        # Create the openApiSchema gateway target
+        │   ├── create_oauth_provider.py# Create the outbound OAuth2 provider
+        │   ├── gateway-workload-policy.json # IAM the gateway role needs
+        │   └── probe_tool.py           # Call the gateway's MCP endpoint directly (debug)
+        ├── launchAgent.sh              # Cognito/bootstrap-stack flow (alternative)
+        └── deploy-agentcore-runtime.sh # Cognito configure + launch (used by launchAgent.sh)
 ```
 
-## Architecture diagram
+---
 
-An editable architecture diagram lives at
-[`docs/architecture.drawio`](docs/architecture.drawio). Open it with the
-[draw.io desktop app](https://www.drawio.com/), the VS Code *Draw.io Integration*
-extension, or [app.diagrams.net](https://app.diagrams.net). It shows the full
-flow: browser SPA (Amplify Hosting) → Cognito email-OTP → AgentCore Runtime →
-Strands + Claude → AgentCore Gateway (MCP) with Verified Permissions → the
-deployed API Gateway + Lambda backend and its data, plus the optional direct
-`BACKEND_API_URL` demo path.
+## What to run (by goal)
+
+Pick the goal you want. A → F increase in scope; each stands on its own.
+
+### A. Just see the UI (no AWS)
+
+Only needs Python.
+
+```bash
+cd static
+python -m http.server 8000
+# open http://localhost:8000 — sign in with any email + code 123456
+```
+
+Runs in **Demo mode** (mocked replies) so you can explore the animated UI and the
+"How it works" panel. Motion respects `prefers-reduced-motion`.
+
+### B. Run the real backend locally (no AWS)
+
+The backend is stdlib-only Python — nothing to install.
+
+```bash
+# terminal 1 — start the tools API
+python backend/server.py                       # http://localhost:8080
+curl "http://localhost:8080/pantry"            # real seed data
+
+# then point the SPA at it: in static/config.js set
+#   BACKEND_API_URL: 'http://localhost:8080',
+# and serve the frontend as in step A.
+```
+
+The SPA badge switches to **Live backend data** and answers come from the real
+handlers + seed data. See [`backend/README.md`](backend/README.md) for the data
+model and every endpoint.
+
+### C. Deploy the backend to AWS
+
+Needs the **AWS CLI** and **AWS SAM CLI** with credentials configured.
+
+```bash
+cd backend
+sam build
+sam deploy            # creates CloudFormation stack: good-neighbor-backend (us-east-1)
+```
+
+Copy the `ApiBaseUrl` output into `static/config.js` as `BACKEND_API_URL`. The
+frontend now talks to your live AWS backend (Lambda + HTTP API Gateway).
+
+### D. Deploy the frontend to AWS Amplify
+
+Push this repo to Git, then in the **Amplify console**: *New app → Host web app →
+connect the repo → deploy*. Amplify auto-detects [`amplify.yml`](amplify.yml)
+(which publishes `static/` and prunes the backend `AgentCode/` from the web
+root). To inject `config.js` from Amplify env vars instead of committing it, see
+the commented block in `amplify.yml`.
+
+### E. Deploy the agent to AgentCore (no Cognito)
+
+This runs the Strands agent on **AgentCore Runtime** with **Amazon Nova Pro**,
+using **AWS IAM (SigV4)** inbound auth — no Cognito, no `bootstrap-stack`.
+
+Prerequisites:
+
+- `pip install bedrock-agentcore-starter-toolkit` (gives the `agentcore` CLI)
+- **Bedrock model access** for Amazon Nova in your region (Nova needs no
+  Marketplace subscription, so no payment-instrument gate)
+- A standalone execution role — the trust + permissions JSON is in
+  [`static/AgentCode/iam/`](static/AgentCode/iam)
+
+```powershell
+cd static/AgentCode
+# Windows: force UTF-8 so the CLI's console output doesn't crash on cp1252
+$env:PYTHONUTF8=1; $env:PYTHONIOENCODING="utf-8"
+powershell -ExecutionPolicy Bypass -File .\deploy-agent-noauth.ps1
+```
+
+The script runs `agentcore configure` (no `--authorizer-config` → IAM auth) then
+`agentcore deploy` (builds the ARM64 container remotely via CodeBuild — no local
+Docker). Invoke it (pass a `--runtime-user-id`; see below why):
+
+```powershell
+'{"prompt": "hello"}' | Out-File -Encoding ascii payload.json
+aws bedrock-agentcore invoke-agent-runtime --region us-east-1 `
+  --agent-runtime-arn <RUNTIME_ARN> --runtime-user-id demo-user `
+  --payload fileb://payload.json --content-type application/json --accept application/json out.json
+```
+
+> There is also a Cognito-based path (`launchAgent.sh` + `deploy-agentcore-runtime.sh`)
+> that uses a `bootstrap-stack` for the Cognito pool, S3, and CloudFront. Use the
+> no-Cognito path above unless you already have that stack.
+
+### F. Wire the agent to the live backend (Gateway)
+
+This is what makes the agent answer from **real** data instead of only its own
+reasoning. The backend REST API is fronted by an **AgentCore Gateway** exposed to
+the agent over MCP.
+
+```bash
+# 1. Create the gateway (auto-creates a Cognito authorizer + gateway role)
+agentcore gateway create-mcp-gateway --region us-east-1 --name GoodNeighborGateway
+
+# 2. Register the backend as an MCP tool target (edit IDs in the script first)
+python static/AgentCode/gateway/create_target.py
+
+# 3. Create the outbound OAuth2 provider the agent uses to call the gateway
+python static/AgentCode/gateway/create_oauth_provider.py
+
+# 4. Point the runtime at the gateway and redeploy
+cd static/AgentCode
+agentcore deploy --auto-update-on-conflict `
+  --env COMMUNITY_GATEWAY_URL=<gateway mcp url> `
+  --env COMMUNITY_OAUTH_PROVIDER=good-neighbor-gateway-oauth
+```
+
+Then invoke with a data question (again, pass `--runtime-user-id`):
+
+```powershell
+'{"prompt": "What are the current pantry stock levels?"}' | Out-File -Encoding ascii q.json
+aws bedrock-agentcore invoke-agent-runtime --region us-east-1 `
+  --agent-runtime-arn <RUNTIME_ARN> --runtime-user-id demo-user `
+  --payload fileb://q.json --content-type application/json --accept application/json out.json
+```
+
+The agent returns a Markdown table of the live pantry data plus a summary.
+
+**Why `--runtime-user-id`?** The runtime uses IAM (SigV4) inbound auth, so the
+outbound machine-to-machine token flow (AgentCore Identity) needs a workload
+identity — the user id supplies it. Without it you get *"Workload access token
+has not been set."*
+
+**Debugging:** [`gateway/probe_tool.py`](static/AgentCode/gateway/probe_tool.py)
+calls the gateway's MCP endpoint directly (token → list tools → call one), so you
+can see the exact tool result the agent receives. This is the fastest way to tell
+an auth failure apart from a model-behavior issue.
+
+---
+
+## Deployed resources (this account)
+
+For reference, what a full deploy created in `us-east-1` (account `466742534146`):
+
+| Resource | Identifier |
+|----------|------------|
+| Backend stack | `good-neighbor-backend` (Lambda + HTTP API) |
+| Backend API URL | `https://h1aly0x3a1.execute-api.us-east-1.amazonaws.com` |
+| Agent runtime | `good_neighbor_agent-m0NZWbGrv5` (Amazon Nova Pro, IAM auth) |
+| Runtime exec role | `good-neighbor-agent-exec-role` |
+| Gateway | `goodneighborgateway-y0bvoowruo` |
+| Gateway target | `BackendTools` (openApiSchema → backend API) |
+| Gateway exec role | `AgentCoreGatewayExecutionRole` |
+| Outbound OAuth2 provider | `good-neighbor-gateway-oauth` |
+
+---
 
 ## How the agent works
 
 `agent.py` defines a Strands `Agent` fronted by the AgentCore Runtime
-(`BedrockAgentCoreApp`). Key points:
+(`BedrockAgentCoreApp`).
 
-- **Model** — Anthropic Claude on Amazon Bedrock, invoked through the Strands
-  `BedrockModel`.
-- **Tool groups** — the agent registers up to four tool groups, each an MCP
-  connection plus the AVP resource ids (gateway target prefixes) it can expose.
-  A group is only registered when its gateway URL is configured, so the agent
-  runs with any subset of tools deployed. Nothing connects at import time.
-- **Per-request connections** — `build_session_tools` opens only the gateways
-  the caller is authorized to use, inside an `ExitStack` that stays open for the
-  duration of the invocation. Outbound OAuth2 tokens are minted per request.
-- **Two-phase authorization** — when an AVP policy store is configured, the
-  agent (1) pre-authorizes each group's declared resource ids before connecting,
-  then (2) filters the actual tool list to the allowed set after listing tools.
-  When AVP is not configured, all registered groups load.
+- **Model** — Amazon Nova Pro (`us.amazon.nova-pro-v1:0`) via the Strands
+  `BedrockModel`. Amazon's own model family, so no Marketplace subscription is
+  needed (avoids the `INVALID_PAYMENT_INSTRUMENT` gate that third-party models
+  can hit).
+- **Tool groups** — the agent registers a tool group only when its gateway URL is
+  configured, so it runs with any subset of tools. Nothing connects at import
+  time; connections open per request. In the current deploy the **community**
+  group is wired to the Gateway, and that one Gateway exposes all backend tools.
+- **Grounded** — the system prompt leads with "use the tool result": when a tool
+  returns data the agent must present it (Markdown table + summary); it declines
+  only when no tool can serve the request.
+- **Optional AVP** — if `AVP_POLICY_STORE_ID` is set, tools are filtered per
+  request against the caller's identity via Amazon Verified Permissions; unset,
+  all registered groups load.
 
-### Tool groups
+---
 
-| Group | Capability | Inbound auth to gateway |
-|-------|------------|-------------------------|
-| `guidelines` | Donation & food-safety guidelines | AWS IAM (SigV4), execution-role creds |
-| `community` | Surplus listings, resource catalog, recipient needs | OAuth2 via AgentCore Identity (M2M) |
-| `pantry` | Partner pantry stock levels | OAuth2 via AgentCore Identity (M2M) |
-| `logistics` | Volunteers & vehicles | OAuth2 via AgentCore Identity (M2M) |
+## Configuration reference
 
-## Configuration
-
-The agent is configured entirely through environment variables on the AgentCore
-runtime. Set only the ones for the tools you deploy; unset groups are skipped.
+Agent runtime environment variables (set via `agentcore deploy --env KEY=VALUE`):
 
 | Variable | Purpose |
 |----------|---------|
-| `AWS_REGION` | AWS region (defaults to `us-east-1`) |
-| `GUIDELINES_GATEWAY_URL` | MCP URL of the guidelines gateway (SigV4) |
-| `COMMUNITY_GATEWAY_URL` | MCP URL of the surplus/catalog/needs gateway |
-| `COMMUNITY_OAUTH_PROVIDER` | AgentCore Identity credential-provider name for the community gateway |
-| `PANTRY_GATEWAY_URL` | MCP URL of the pantry-levels gateway |
-| `PANTRY_OAUTH_PROVIDER` | AgentCore Identity credential-provider name for the pantry gateway |
-| `LOGISTICS_GATEWAY_URL` | MCP URL of the volunteers/vehicles gateway |
-| `LOGISTICS_OAUTH_PROVIDER` | AgentCore Identity credential-provider name for the logistics gateway |
-| `AVP_POLICY_STORE_ID` | Enables per-request AVP tool filtering when set |
+| `AWS_REGION` | AWS region (default `us-east-1`) |
+| `COMMUNITY_GATEWAY_URL` | MCP URL of the gateway the agent calls |
+| `COMMUNITY_OAUTH_PROVIDER` | AgentCore Identity provider name for the gateway |
+| `GUIDELINES_GATEWAY_URL` | (optional) separate guidelines gateway (SigV4) |
+| `PANTRY_GATEWAY_URL` / `PANTRY_OAUTH_PROVIDER` | (optional) separate pantry gateway |
+| `LOGISTICS_GATEWAY_URL` / `LOGISTICS_OAUTH_PROVIDER` | (optional) separate logistics gateway |
+| `AVP_POLICY_STORE_ID` | (optional) enables per-request AVP tool filtering |
 
-OAuth2 client credentials are **not** environment variables — they live in the
-AgentCore Identity vault behind the named credential providers above.
+Frontend config (`static/config.js`, `window.WORKSHOP_CONFIG`):
 
-## Prerequisites
+| Key | Purpose |
+|-----|---------|
+| `BACKEND_API_URL` | Deployed backend API — SPA answers directly from it |
+| `COGNITO_USER_POOL_ID` / `COGNITO_CLIENT_ID` / `COGNITO_REGION` | Cognito email-OTP sign-in |
+| `AGENTCORE_RUNTIME_ARN` / `AGENTCORE_ENDPOINT` | Call the agent runtime from the browser |
 
-- The **`bootstrap-stack`** CloudFormation stack deployed (provides the Cognito
-  user pool, client, S3 bucket, and CloudFront distribution) and the agent
-  execution role.
-- AWS credentials with permission to deploy AgentCore.
-- Python **3.10+** (the launcher will try to install 3.12 if none is found).
-- The **AgentCore CLI** (`agentcore`) available on `PATH`.
+IAM permissions the wiring requires (each otherwise surfaces as
+`AccessDeniedException`):
 
-## Deploying the agent
+- **Runtime role** (`good-neighbor-agent-exec-role`): Bedrock invoke,
+  `bedrock-agentcore:GetResourceOauth2Token`, `GetWorkloadAccessToken*`, and
+  `secretsmanager:GetSecretValue` on `bedrock-agentcore-identity!default/*`.
+- **Gateway role** (`AgentCoreGatewayExecutionRole`):
+  `bedrock-agentcore:GetWorkloadAccessToken` + `GetResourceApiKey` — see
+  [`gateway/gateway-workload-policy.json`](static/AgentCode/gateway/gateway-workload-policy.json).
 
-From `static/AgentCode`:
+---
 
-```bash
-# Full flow: create venv, install deps, configure + launch the runtime,
-# then generate and publish the frontend config.js
-./launchAgent.sh
+## Troubleshooting
 
-# If you already have the dependencies installed:
-./launchAgent.sh --skip-venv
-```
+- **Agent replies "I'm not able to help…" for data questions** — the tool
+  returned an error or the prompt is over-declining. Run `gateway/probe_tool.py`
+  to see the raw tool result. If it shows *"unable to fetch outbound api key"*,
+  the gateway role is missing `GetWorkloadAccessToken`/`GetResourceApiKey`.
+- **"Workload access token has not been set"** — invoke with `--runtime-user-id`.
+- **`INVALID_PAYMENT_INSTRUMENT`** — you're on a third-party model; switch to
+  Amazon Nova or add a payment method + enable the model in Bedrock.
+- **`agentcore` CLI crashes with a `UnicodeEncodeError` on Windows** — set
+  `$env:PYTHONUTF8=1; $env:PYTHONIOENCODING="utf-8"` first.
+- **`agentcore deploy` seems to hang / stops mid-build** — let it run to
+  completion (it monitors CodeBuild); use `--auto-update-on-conflict` to update
+  an existing runtime.
+- **SAM CLI shows a non-zero exit on Windows** — its progress banner goes to
+  stderr; trust the textual `Successfully created/updated stack` result.
 
-`launchAgent.sh` calls `deploy-agentcore-runtime.sh`, which:
+---
 
-1. Verifies the AgentCore CLI and AWS credentials.
-2. Reads the Cognito user pool / client id from `bootstrap-stack` outputs.
-3. Resolves the agent execution role.
-4. Runs `agentcore configure` with a **Cognito JWT authorizer** and an
-   `Authorization` header allowlist, then `agentcore launch` (agent name
-   `good_neighbor_agent`).
+## Teardown
 
-After the runtime is deployed, `launchAgent.sh` writes `config.js` (Cognito +
-AgentCore Runtime ARN/endpoint) for the frontend, uploads the frontend SPA and
-`config.js` to S3, and invalidates the CloudFront cache.
-
-## Frontend
-
-The `static/` directory is a no-build single-page app that lets a community
-member sign in and chat with the agent:
-
-1. **Amazon Cognito (passwordless email OTP)** — the user enters their email,
-   Cognito emails a one-time code (using its default email — no SES, no Lambda),
-   and verifying the code returns a JWT.
-2. **AgentCore Runtime** — the SPA calls `InvokeAgentRuntime` over HTTPS with
-   the JWT as a `Bearer` token; the runtime's custom JWT authorizer validates
-   it (no SigV4 in the browser).
-3. **Response** — `agent.py` returns Markdown, which the SPA renders as tables.
-
-The live flow needs the Cognito pool set up for email OTP (enable **Email OTP**,
-set email to **Send with Cognito**, allow the **`USER_AUTH`** flow on a public
-app client). See [`static/README.md`](static/README.md#enabling-email-otp-on-cognito-one-time-setup-no-ses)
-for the exact toggles.
-
-Run it locally with **no AWS** (demo mode with mocked replies) by serving the
-folder with any static server:
+Remove everything a full deploy created (stops any charges):
 
 ```bash
-cd static
-python -m http.server 8000   # open http://localhost:8000
+# Backend (Lambda + API Gateway)
+sam delete --stack-name good-neighbor-backend --region us-east-1
+
+# Agent runtime
+agentcore destroy
+
+# Gateway + target, OAuth2 provider, and the IAM roles/Cognito pool the gateway
+# auto-created are removed via the console or the bedrock-agentcore-control API.
 ```
 
-When `config.js` still holds placeholder values the app shows a **Demo mode**
-badge; after a deploy it shows **Connected to AWS**. See
-[`static/README.md`](static/README.md) for the full integration walkthrough and
-architecture diagram.
-
-## Backend (tools + data)
-
-The `backend/` directory implements the tools behind the schemas, with real
-seed data the agent can reason over (surplus listings cross-referenced to
-recipient needs, pantry levels, volunteers, and vehicles). Every tool runs
-locally with no AWS via a single stdlib-only server:
-
-```bash
-python backend/server.py     # http://localhost:8080
-curl "http://localhost:8080/needs?resource_id=RES001"
-```
-
-The same handlers deploy to AWS as a single Lambda behind an HTTP API Gateway
-using the bundled AWS SAM template:
-
-```bash
-cd backend
-sam build && sam deploy      # stack: good-neighbor-backend (us-east-1)
-```
-
-See [`backend/README.md`](backend/README.md) for the data model, endpoint list,
-computed fields, the full deploy/update/teardown steps, and how these endpoints
-sit behind AgentCore Gateway targets.
-
-## Schemas
-
-The `schemas/` directory holds the OpenAPI 3.0.3 and Lambda JSON Schema
-definitions used to configure AgentCore Gateway targets. See
-[`schemas/README.md`](schemas/README.md) for per-file details, the tool-group
-mapping, and API usage examples.
+---
 
 ## License
 
