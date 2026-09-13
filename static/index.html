@@ -95,33 +95,38 @@
     <div class="modal-body">
       <button class="modal-close" id="how-close">×</button>
       <h2>How this works</h2>
-      <p class="muted">Every message you send follows this path through AWS:</p>
+      <p class="muted">
+        This app runs in one of three modes depending on what's set in
+        <code>config.js</code> — the badge in the header shows which one is
+        active:
+      </p>
       <ol class="flow">
-        <li><b>Browser (this SPA)</b> — you sign in and type a question.</li>
-        <li><b>Amazon Cognito</b> — you enter your email, Cognito emails a one-time code, and verifying it returns a JWT access token that identifies your organization.</li>
-        <li><b>AgentCore Runtime</b> — the SPA calls <code>InvokeAgentRuntime</code> over HTTPS with the JWT as a Bearer token. A custom JWT authorizer validates it.</li>
-        <li><b>Strands agent (agent.py)</b> — runs Claude on Amazon Bedrock. It has no built-in knowledge; it only relays tool results.</li>
-        <li><b>AgentCore Gateway (MCP)</b> — the agent opens only the tool gateways your org is allowed to use.</li>
-        <li><b>Amazon Verified Permissions</b> — filters which tools your identity can access, per request.</li>
-        <li><b>Backend tools</b> — Lambda (guidelines, SigV4) and API-Gateway targets (surplus, catalog, needs, pantry, volunteers, vehicles) via OAuth2 minted by AgentCore Identity.</li>
+        <li><b>Connected to AWS</b> — full agent path: sign in with Amazon Cognito (email one-time code → JWT), then the app calls the AgentCore Runtime, which runs the Strands agent on <b>Amazon Nova</b> and answers from live tools.</li>
+        <li><b>Live backend data</b> — the app calls the deployed backend API directly (<code>BACKEND_API_URL</code>) and formats the real data itself. No Cognito, no agent — handy for demos.</li>
+        <li><b>Demo mode</b> — no AWS configured; replies are mocked locally so you can explore the UI (sign in with any email + code <code>123456</code>).</li>
       </ol>
+
+      <p class="muted">In <b>Connected to AWS</b> mode, a message follows this path:</p>
       <div class="diagram">
         <pre>
- You ─▶ Cognito ─(JWT)─▶ AgentCore Runtime ─▶ Strands+Claude
+ You ─▶ Cognito ─(JWT)─▶ AgentCore Runtime ─▶ Strands agent + Amazon Nova
                                                    │
                                           AgentCore Gateway (MCP)
+                                          (OAuth2 token from AgentCore Identity)
                                                    │
-                              ┌────────────────────┼─────────────────────┐
-                          Guidelines           Community              Logistics
-                          (Lambda, SigV4)   (surplus/catalog/needs)  (volunteers/
-                                             + Pantry (OAuth2 M2M)     vehicles)
+                                      openApiSchema target "BackendTools"
                                                    │
-                                    Amazon Verified Permissions (per-request filter)
+                                    API Gateway ─▶ Lambda ─▶ community data
+                                 (surplus · catalog · needs · pantry ·
+                                  volunteers · vehicles · guidelines)
+
+        (optional) Amazon Verified Permissions filters tools per request
         </pre>
       </div>
       <p class="muted small">
-        Values come from <code>config.js</code>, generated at deploy time by
-        <code>launchAgent.sh</code> from the <code>bootstrap-stack</code> outputs.
+        The agent is <b>grounded</b>: it only states what a tool returned during
+        your conversation. Config values live in <code>config.js</code>
+        (Cognito, AgentCore runtime ARN, and/or <code>BACKEND_API_URL</code>).
       </p>
     </div>
   </div>

@@ -1,0 +1,140 @@
+<mxfile host="app.diagrams.net" agent="Good Neighbor Agent" version="24.7.7">
+  <diagram id="good-neighbor-aws-icons" name="Good Neighbor (AWS icons)">
+    <mxGraphModel dx="1600" dy="1000" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1800" pageHeight="1200" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="title" value="Good Neighbor Agent — Community Waste Recovery (AWS services, us-east-1)" style="text;html=1;fontSize=20;fontStyle=1;align=center;verticalAlign=middle;fontColor=#232F3E;" vertex="1" parent="1">
+          <mxGeometry x="360" y="12" width="1100" height="34" as="geometry" />
+        </mxCell>
+
+        <!-- ===== AWS Cloud container ===== -->
+        <mxCell id="cloud" value="AWS Cloud — us-east-1 (account 466742534146)" style="points=[[0,0],[0.25,0],[0.5,0],[0.75,0],[1,0],[1,0.25],[1,0.5],[1,0.75],[1,1],[0.75,1],[0.5,1],[0.25,1],[0,1],[0,0.75],[0,0.5],[0,0.25]];outlineConnect=0;gradientColor=none;html=1;whiteSpace=wrap;fontSize=12;fontStyle=0;container=1;pointerEvents=0;collapsible=0;recursiveResize=0;shape=mxgraph.aws4.group;grIcon=mxgraph.aws4.group_aws_cloud_alt;strokeColor=#232F3E;fillColor=none;verticalAlign=top;align=left;spacingLeft=30;fontColor=#232F3E;dashed=0;" vertex="1" parent="1">
+          <mxGeometry x="300" y="70" width="1440" height="1020" as="geometry" />
+        </mxCell>
+
+        <!-- ===== User (outside cloud) ===== -->
+        <mxCell id="user" value="Community&#10;member" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#232F3E;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;shape=mxgraph.aws4.user;" vertex="1" parent="1">
+          <mxGeometry x="110" y="500" width="60" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- ===== Frontend hosting ===== -->
+        <mxCell id="amplify" value="AWS Amplify Hosting&#10;(static SPA + config.js)" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#E7157B;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=11;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.amplify;" vertex="1" parent="1">
+          <mxGeometry x="360" y="500" width="72" height="72" as="geometry" />
+        </mxCell>
+
+        <!-- ===== Cognito ===== -->
+        <mxCell id="cognito" value="Amazon Cognito&#10;email OTP → JWT" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#DD344C;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=11;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.cognito;" vertex="1" parent="1">
+          <mxGeometry x="560" y="500" width="72" height="72" as="geometry" />
+        </mxCell>
+
+        <!-- ===== Runtime group (Bedrock AgentCore) ===== -->
+        <mxCell id="rtGroup" value="Amazon Bedrock AgentCore — Runtime + Identity + Gateway" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F2F7F1;strokeColor=#7AA116;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#3d6b2f;dashed=0;" vertex="1" parent="1">
+          <mxGeometry x="760" y="120" width="470" height="640" as="geometry" />
+        </mxCell>
+
+        <mxCell id="bedrock" value="Bedrock AgentCore Runtime&#10;good_neighbor_agent&#10;(inbound: AWS IAM / SigV4)" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#01A88D;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=11;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.bedrock;" vertex="1" parent="1">
+          <mxGeometry x="800" y="165" width="72" height="72" as="geometry" />
+        </mxCell>
+        <mxCell id="nova" value="Amazon Nova Pro&#10;us.amazon.nova-pro-v1:0&#10;(no Marketplace subscription)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#527FFF;strokeColor=#232F3E;fontColor=#ffffff;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="920" y="165" width="270" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="strands" value="Strands agent (agent.py) — grounded; states only what a tool returned" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#7AA116;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="800" y="260" width="390" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="identity" value="AgentCore Identity — mints outbound OAuth2 (M2M) token&#10;provider: good-neighbor-gateway-oauth" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#DD344C;strokeColor=none;dashed=0;verticalLabelPosition=right;verticalAlign=middle;align=left;spacingLeft=6;html=1;fontSize=11;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.identity_and_access_management_iam;" vertex="1" parent="1">
+          <mxGeometry x="800" y="330" width="52" height="52" as="geometry" />
+        </mxCell>
+        <mxCell id="avp" value="Amazon Verified Permissions&#10;(optional per-request tool filter)" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#DD344C;strokeColor=none;dashed=1;verticalLabelPosition=right;verticalAlign=middle;align=left;spacingLeft=6;html=1;fontSize=11;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.identity_and_access_management_iam;" vertex="1" parent="1">
+          <mxGeometry x="800" y="400" width="52" height="52" as="geometry" />
+        </mxCell>
+        <mxCell id="gateway" value="AgentCore Gateway (MCP)&#10;goodneighborgateway&#10;target: BackendTools (OpenAPI, 7 tools)" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#01A88D;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=11;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.bedrock;" vertex="1" parent="1">
+          <mxGeometry x="820" y="500" width="72" height="72" as="geometry" />
+        </mxCell>
+        <mxCell id="secrets" value="Secrets Manager&#10;(vault: OAuth2 client secret)" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#DD344C;strokeColor=none;dashed=0;verticalLabelPosition=right;verticalAlign=middle;align=left;spacingLeft=6;html=1;fontSize=10;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.secrets_manager;" vertex="1" parent="1">
+          <mxGeometry x="1000" y="330" width="48" height="48" as="geometry" />
+        </mxCell>
+        <mxCell id="iamrole" value="IAM exec roles&#10;(runtime + gateway)" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#DD344C;strokeColor=none;dashed=0;verticalLabelPosition=right;verticalAlign=middle;align=left;spacingLeft=6;html=1;fontSize=10;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.identity_and_access_management_iam;" vertex="1" parent="1">
+          <mxGeometry x="1000" y="410" width="48" height="48" as="geometry" />
+        </mxCell>
+
+        <!-- ===== Build/registry (deploy-time) ===== -->
+        <mxCell id="buildGroup" value="Container build (deploy time)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FBF3EC;strokeColor=#ED7100;verticalAlign=top;fontStyle=1;fontSize=11;fontColor=#8a4b00;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="760" y="790" width="470" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="codebuild" value="AWS CodeBuild&#10;(builds ARM64 image)" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#ED7100;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.codebuild;" vertex="1" parent="1">
+          <mxGeometry x="820" y="825" width="60" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="ecr" value="Amazon ECR&#10;(agent image)" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#ED7100;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.ecr;" vertex="1" parent="1">
+          <mxGeometry x="1010" y="825" width="60" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="cwlogs" value="Amazon CloudWatch&#10;(runtime + gateway logs)" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#E7157B;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.cloudwatch;" vertex="1" parent="1">
+          <mxGeometry x="1150" y="825" width="60" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- ===== Backend group (SAM) ===== -->
+        <mxCell id="beGroup" value="Backend — SAM stack good-neighbor-backend" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F2F0F7;strokeColor=#8C4FFF;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#5a3d7a;dashed=0;" vertex="1" parent="1">
+          <mxGeometry x="1300" y="560" width="380" height="400" as="geometry" />
+        </mxCell>
+        <mxCell id="apigw" value="Amazon API Gateway&#10;(HTTP API)" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#E7157B;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=11;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.api_gateway;" vertex="1" parent="1">
+          <mxGeometry x="1350" y="610" width="72" height="72" as="geometry" />
+        </mxCell>
+        <mxCell id="lambda" value="AWS Lambda&#10;good-neighbor-backend&#10;routes by path" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#ED7100;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=11;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.lambda;" vertex="1" parent="1">
+          <mxGeometry x="1540" y="610" width="72" height="72" as="geometry" />
+        </mxCell>
+        <mxCell id="handlers" value="Tool handlers: guidelines · community · pantry · logistics" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#8C4FFF;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1340" y="740" width="300" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="data" value="Seed data (bundled JSON)&#10;resources · orgs · surplus · needs&#10;pantry · volunteers · vehicles · guidelines" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=14;fillColor=#ffffff;strokeColor=#8C4FFF;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1395" y="810" width="190" height="90" as="geometry" />
+        </mxCell>
+
+        <!-- ===== Edges: request flow ===== -->
+        <mxCell id="e1" value="open app" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#232F3E;strokeWidth=2;fontSize=10;" edge="1" parent="1" source="user" target="amplify">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" value="1. email → OTP → JWT" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#DD344C;strokeWidth=2;fontSize=10;" edge="1" parent="1" source="amplify" target="cognito">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" value="2. InvokeAgentRuntime (Bearer JWT + runtime-user-id)" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#7AA116;strokeWidth=2;fontSize=10;" edge="1" parent="1" source="amplify" target="bedrock">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" value="3. reason" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#7AA116;strokeWidth=2;fontSize=10;" edge="1" parent="1" source="bedrock" target="nova">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#7AA116;strokeWidth=1;" edge="1" parent="1" source="bedrock" target="strands">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" value="mint token" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#7AA116;strokeWidth=1;dashed=1;fontSize=10;" edge="1" parent="1" source="strands" target="identity">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6b" value="read secret" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#DD344C;strokeWidth=1;dashed=1;fontSize=9;" edge="1" parent="1" source="identity" target="secrets">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" value="4. call tools (MCP, Bearer M2M)" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#7AA116;strokeWidth=2;fontSize=10;" edge="1" parent="1" source="identity" target="gateway">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" value="5. HTTPS (+ outbound api key)" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#8C4FFF;strokeWidth=2;fontSize=10;" edge="1" parent="1" source="gateway" target="apigw">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" value="6. invoke" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#8C4FFF;strokeWidth=2;fontSize=10;" edge="1" parent="1" source="apigw" target="lambda">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e10" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#8C4FFF;strokeWidth=2;" edge="1" parent="1" source="lambda" target="handlers">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e11" value="7. read" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#8C4FFF;strokeWidth=2;fontSize=10;" edge="1" parent="1" source="handlers" target="data">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e12" value="Live-backend-data mode: SPA → API directly (BACKEND_API_URL); no Cognito / no agent" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#3fb6e0;strokeWidth=2;dashed=1;fontSize=10;fontColor=#1b6f92;" edge="1" parent="1" source="amplify" target="apigw">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="legend" value="Legend&#10;- solid green: request through the agent (Amazon Nova)&#10;- dashed green/red: token minting + secret read&#10;- solid purple: MCP gateway → backend&#10;- dashed blue: Live-backend-data demo path (frontend → API directly)&#10;- dashed orange box: deploy-time only (CodeBuild → ECR image)" style="text;html=1;align=left;verticalAlign=top;fontSize=11;fillColor=#f5f5f5;strokeColor=#cccccc;rounded=1;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="90" y="640" width="470" height="140" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

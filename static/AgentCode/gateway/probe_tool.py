@@ -6,14 +6,32 @@ exactly what tool result the agent receives.
 Run:  python gateway/probe_tool.py
 """
 import json
+import os
+import sys
 import urllib.request
 import urllib.parse
 
-TOKEN_URL = "https://agentcore-1476ef5b.auth.us-east-1.amazoncognito.com/oauth2/token"
-CLIENT_ID = "6l75r1ke77nhcapln9qpc9goaf"
-CLIENT_SECRET = "69dludr4u4qifk3n2cs7m5kk26pme2mepgmbsfsh8h2s58f6rnp"
-SCOPE = "GoodNeighborGateway/invoke"
-MCP_URL = "https://goodneighborgateway-y0bvoowruo.gateway.bedrock-agentcore.us-east-1.amazonaws.com/mcp"
+# Never hardcode credentials. Supply these via environment variables:
+#   GATEWAY_COGNITO_DOMAIN  — https://<domain>.auth.us-east-1.amazoncognito.com
+#   GATEWAY_CLIENT_ID       — the Cognito app client id
+#   GATEWAY_CLIENT_SECRET   — the Cognito app client secret
+#   GATEWAY_MCP_URL         — the gateway's /mcp endpoint URL
+#   GATEWAY_SCOPE           — OAuth2 scope (default: GoodNeighborGateway/invoke)
+_domain = os.environ.get("GATEWAY_COGNITO_DOMAIN", "")
+TOKEN_URL = f"{_domain}/oauth2/token" if _domain else ""
+CLIENT_ID = os.environ.get("GATEWAY_CLIENT_ID", "")
+CLIENT_SECRET = os.environ.get("GATEWAY_CLIENT_SECRET", "")
+SCOPE = os.environ.get("GATEWAY_SCOPE", "GoodNeighborGateway/invoke")
+MCP_URL = os.environ.get("GATEWAY_MCP_URL", "")
+
+_missing = [k for k, v in {
+    "GATEWAY_COGNITO_DOMAIN": _domain,
+    "GATEWAY_CLIENT_ID": CLIENT_ID,
+    "GATEWAY_CLIENT_SECRET": CLIENT_SECRET,
+    "GATEWAY_MCP_URL": MCP_URL,
+}.items() if not v]
+if _missing:
+    sys.exit("Missing required environment variables: " + ", ".join(_missing))
 
 
 def get_token():

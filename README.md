@@ -53,9 +53,15 @@ Amazon Cognito (email OTP)  ──JWT──▶  AgentCore Runtime  (Amazon Nova 
                           API Gateway + Lambda  (backend/, real data)
 ```
 
-An editable diagram is at [`docs/architecture.drawio`](docs/architecture.drawio)
-(open with the [draw.io desktop app](https://www.drawio.com/), the VS Code
-*Draw.io Integration* extension, or [app.diagrams.net](https://app.diagrams.net)).
+Editable draw.io diagrams are in [`docs/`](docs) — open them with the
+[draw.io desktop app](https://www.drawio.com/), the VS Code *Draw.io Integration*
+extension, or [app.diagrams.net](https://app.diagrams.net):
+
+- [`docs/architecture-aws-icons.drawio`](docs/architecture-aws-icons.drawio) —
+  official AWS service icons (Amplify, Cognito, Bedrock/AgentCore, API Gateway,
+  Lambda, Secrets Manager, IAM, CodeBuild, ECR, CloudWatch). **Recommended.**
+- [`docs/architecture.drawio`](docs/architecture.drawio) — simpler plain-box
+  version of the same flow.
 
 There are **two ways** the frontend can reach data, and both are built:
 

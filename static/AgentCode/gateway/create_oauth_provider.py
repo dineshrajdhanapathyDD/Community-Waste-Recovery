@@ -7,16 +7,35 @@ call the gateway's MCP endpoint.
 Run:  python gateway/create_oauth_provider.py
 """
 import json
+import os
+import sys
 import boto3
 
-REGION = "us-east-1"
-PROVIDER_NAME = "good-neighbor-gateway-oauth"
+REGION = os.environ.get("AWS_REGION", "us-east-1")
+PROVIDER_NAME = os.environ.get("GATEWAY_OAUTH_PROVIDER_NAME", "good-neighbor-gateway-oauth")
 
-# From the auto-created gateway Cognito authorizer.
-CLIENT_ID = "6l75r1ke77nhcapln9qpc9goaf"
-CLIENT_SECRET = "69dludr4u4qifk3n2cs7m5kk26pme2mepgmbsfsh8h2s58f6rnp"
-DOMAIN = "https://agentcore-1476ef5b.auth.us-east-1.amazoncognito.com"
-USER_POOL_ISSUER = "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_munIQlezO"
+# Never hardcode credentials. These come from the auto-created gateway Cognito
+# authorizer and are supplied via environment variables:
+#   GATEWAY_CLIENT_ID       — the Cognito app client id
+#   GATEWAY_CLIENT_SECRET   — the Cognito app client secret
+#   GATEWAY_COGNITO_DOMAIN  — e.g. https://<domain>.auth.us-east-1.amazoncognito.com
+#   GATEWAY_USER_POOL_ISSUER— https://cognito-idp.<region>.amazonaws.com/<poolId>
+# Fetch the client secret with:
+#   aws cognito-idp describe-user-pool-client --user-pool-id <poolId> \
+#       --client-id <clientId> --query "UserPoolClient.ClientSecret" --output text
+CLIENT_ID = os.environ.get("GATEWAY_CLIENT_ID", "")
+CLIENT_SECRET = os.environ.get("GATEWAY_CLIENT_SECRET", "")
+DOMAIN = os.environ.get("GATEWAY_COGNITO_DOMAIN", "")
+USER_POOL_ISSUER = os.environ.get("GATEWAY_USER_POOL_ISSUER", "")
+
+_missing = [k for k, v in {
+    "GATEWAY_CLIENT_ID": CLIENT_ID,
+    "GATEWAY_CLIENT_SECRET": CLIENT_SECRET,
+    "GATEWAY_COGNITO_DOMAIN": DOMAIN,
+    "GATEWAY_USER_POOL_ISSUER": USER_POOL_ISSUER,
+}.items() if not v]
+if _missing:
+    sys.exit("Missing required environment variables: " + ", ".join(_missing))
 
 client = boto3.client("bedrock-agentcore-control", region_name=REGION)
 

@@ -15,6 +15,15 @@ q-*.json
 *-out.txt
 *-out*.json
 
+# Secrets / credentials — never commit
+.env
+.env.*
+*.env
+**/secrets.json
+# Local convenience script for setting gateway credentials (see gateway/README)
+static/AgentCode/gateway/set-env.ps1
+static/AgentCode/gateway/set-env.sh
+
 # OS / editor noise
 .DS_Store
 Thumbs.db
