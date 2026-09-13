@@ -4,7 +4,11 @@ points at the deployed good-neighbor-backend HTTP API.
 
 The backend is open (no auth), but AgentCore's openApiSchema target still
 requires a credential provider, so we attach a dummy API-key header the backend
-simply ignores.
+simply ignores. (No real secret here — "not-used-open-backend" is a placeholder.)
+
+Config via environment (see gateway/README.md); defaults to the deployed values:
+  AWS_REGION           — AWS region (default: us-east-1)
+  GATEWAY_ID           — the AgentCore gateway id to add the target to
 
 Run:  python gateway/create_target.py
 """
@@ -13,8 +17,8 @@ import os
 
 from bedrock_agentcore_starter_toolkit.operations.gateway.client import GatewayClient
 
-REGION = "us-east-1"
-GATEWAY_ID = "goodneighborgateway-y0bvoowruo"
+REGION = os.environ.get("AWS_REGION", "us-east-1")
+GATEWAY_ID = os.environ.get("GATEWAY_ID", "goodneighborgateway-y0bvoowruo")
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 with open(os.path.join(HERE, "backend-openapi.json"), "r", encoding="utf-8") as fh:
