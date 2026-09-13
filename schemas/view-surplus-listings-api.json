@@ -1,0 +1,173 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "View Surplus Listings API",
+    "description": "API for viewing surplus food and goods that donor organizations have posted as available for recovery",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "{apiGatewayUrl}",
+      "description": "API Gateway endpoint",
+      "variables": {}
+    }
+  ],
+  "paths": {
+    "/": {
+      "get": {
+        "summary": "Retrieve surplus donation listings",
+        "description": "Fetches surplus listings posted by donor organizations, filtered by the requesting organization's role and area",
+        "operationId": "viewSurplusListings",
+        "responses": {
+          "200": {
+            "description": "Surplus listings retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SurplusListingsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized access",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "SurplusListingsResponse": {
+        "type": "object",
+        "properties": {
+          "listings": {
+            "type": "array",
+            "description": "List of surplus donation listings",
+            "items": {
+              "$ref": "#/components/schemas/SurplusListing"
+            }
+          },
+          "count": {
+            "type": "integer",
+            "description": "Number of listings returned",
+            "example": 5
+          },
+          "org_role": {
+            "type": "string",
+            "description": "Role of the requesting organization",
+            "enum": [
+              "Coordinator",
+              "Donor",
+              "Recipient"
+            ],
+            "example": "Coordinator"
+          },
+          "org_area": {
+            "type": "string",
+            "description": "Service area of the requesting organization",
+            "example": "North Side"
+          }
+        }
+      },
+      "SurplusListing": {
+        "type": "object",
+        "properties": {
+          "listing_id": {
+            "type": "string",
+            "description": "Unique listing identifier",
+            "example": "LIST12AB34CD"
+          },
+          "donor_name": {
+            "type": "string",
+            "description": "Name of the donor organization",
+            "example": "Riverside Grocery"
+          },
+          "posted_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the surplus was posted, in ISO format",
+            "example": "2025-10-02T14:30:00.000Z"
+          },
+          "pickup_by": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Latest time the surplus must be picked up, in ISO format",
+            "example": "2025-10-03T18:00:00.000Z"
+          },
+          "category": {
+            "type": "string",
+            "description": "Category of the surplus",
+            "example": "Fresh produce"
+          },
+          "quantity": {
+            "type": "string",
+            "description": "Amount available (e.g. weight or unit count)",
+            "example": "40 lbs"
+          },
+          "location": {
+            "type": "string",
+            "description": "Pickup location",
+            "example": "1200 River Rd, North Side"
+          },
+          "items": {
+            "type": "array",
+            "description": "Individual items in the listing",
+            "items": {
+              "$ref": "#/components/schemas/SurplusItem"
+            }
+          },
+          "posted_by": {
+            "type": "string",
+            "description": "Contact who posted the listing",
+            "example": "sarah.johnson"
+          }
+        }
+      },
+      "SurplusItem": {
+        "type": "object",
+        "properties": {
+          "resource_id": {
+            "type": "string",
+            "example": "RES001"
+          },
+          "quantity": {
+            "type": "string",
+            "example": "25 lbs"
+          },
+          "best_before": {
+            "type": "string",
+            "format": "date",
+            "example": "2025-10-04"
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "description": "Error message"
+          }
+        }
+      }
+    }
+  }
+}

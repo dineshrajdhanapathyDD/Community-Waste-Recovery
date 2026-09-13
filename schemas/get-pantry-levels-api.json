@@ -1,0 +1,151 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Get Pantry Levels API",
+    "description": "API for querying current stock levels at partner food banks and pantries",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "{apiGatewayUrl}",
+      "description": "API Gateway endpoint"
+    }
+  ],
+  "paths": {
+    "/pantry": {
+      "get": {
+        "summary": "Retrieve pantry stock levels",
+        "description": "Fetches current stock levels at partner pantries with optional resource filtering",
+        "operationId": "getPantryLevels",
+        "security": [
+          {
+            "CognitoOAuth2": ["pantry/read"]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "resource_id",
+            "in": "query",
+            "description": "Filter pantry levels by a specific resource ID",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "RES001"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pantry levels retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PantryResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "CognitoOAuth2": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "OAuth2 Bearer token from Cognito"
+      }
+    },
+    "schemas": {
+      "PantryResponse": {
+        "type": "object",
+        "properties": {
+          "pantry_items": {
+            "type": "array",
+            "description": "List of pantry stock items",
+            "items": {
+              "$ref": "#/components/schemas/PantryItem"
+            }
+          },
+          "count": {
+            "type": "integer",
+            "description": "Number of pantry items returned",
+            "example": 5
+          }
+        }
+      },
+      "PantryItem": {
+        "type": "object",
+        "properties": {
+          "resource_id": {
+            "type": "string",
+            "description": "Associated resource identifier",
+            "example": "RES001"
+          },
+          "resource_name": {
+            "type": "string",
+            "description": "Resource name",
+            "example": "Canned vegetables"
+          },
+          "quantity_on_hand": {
+            "type": "integer",
+            "description": "Current quantity in stock",
+            "minimum": 0,
+            "example": 50
+          },
+          "org_id": {
+            "type": "string",
+            "description": "Partner organization identifier",
+            "example": "ORG001"
+          },
+          "org_name": {
+            "type": "string",
+            "description": "Partner organization name",
+            "example": "North Side Food Bank"
+          },
+          "storage_location": {
+            "type": "string",
+            "description": "Where the stock is stored",
+            "example": "Main pantry"
+          },
+          "low_stock_threshold": {
+            "type": "integer",
+            "description": "Level below which the item is considered low",
+            "example": 10
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "description": "Error message"
+          }
+        }
+      }
+    }
+  }
+}

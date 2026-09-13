@@ -1,0 +1,26 @@
+{
+    "name": "get-guidelines-lambda",
+    "description": "Retrieves donation and food-safety guideline details for a specific guideline type, including Acceptance rules, safe donation Windows (how long after preparation/best-before an item can still be donated), and Handling instructions",
+    "inputSchema": {
+        "type": "object",
+        "description": "Input parameters for retrieving a donation/food-safety guideline",
+        "properties": {
+            "guideline_type": {
+                "type": "string",
+                "description": "The type of guideline to retrieve. Must be one of: Acceptance, Window, or Handling"
+            }
+        },
+        "required": ["guideline_type"]
+    },
+    "outputSchema": {
+        "type": "object",
+        "description": "Response containing the requested guideline details",
+        "properties": {
+            "guideline_details": {
+                "type": "string",
+                "description": "The detailed text content of the requested donation/food-safety guideline"
+            }
+        },
+        "required": ["guideline_details"]
+    }
+}

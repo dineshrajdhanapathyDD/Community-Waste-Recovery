@@ -1,0 +1,18 @@
+[
+  { "resource_id": "RES001", "category": "produce", "resource": "Fresh tomatoes", "unit": "lb", "perishable": true },
+  { "resource_id": "RES002", "category": "produce", "resource": "Mixed leafy greens", "unit": "lb", "perishable": true },
+  { "resource_id": "RES003", "category": "produce", "resource": "Apples", "unit": "lb", "perishable": true },
+  { "resource_id": "RES004", "category": "produce", "resource": "Carrots", "unit": "lb", "perishable": true },
+  { "resource_id": "RES005", "category": "bakery", "resource": "Bread loaves", "unit": "loaf", "perishable": true },
+  { "resource_id": "RES006", "category": "bakery", "resource": "Assorted pastries", "unit": "item", "perishable": true },
+  { "resource_id": "RES007", "category": "dairy", "resource": "Milk (gallon)", "unit": "gallon", "perishable": true },
+  { "resource_id": "RES008", "category": "dairy", "resource": "Yogurt cups", "unit": "cup", "perishable": true },
+  { "resource_id": "RES009", "category": "canned", "resource": "Canned vegetables", "unit": "can", "perishable": false },
+  { "resource_id": "RES010", "category": "canned", "resource": "Canned soup", "unit": "can", "perishable": false },
+  { "resource_id": "RES011", "category": "canned", "resource": "Canned beans", "unit": "can", "perishable": false },
+  { "resource_id": "RES012", "category": "dry goods", "resource": "Rice (5 lb bag)", "unit": "bag", "perishable": false },
+  { "resource_id": "RES013", "category": "dry goods", "resource": "Pasta", "unit": "box", "perishable": false },
+  { "resource_id": "RES014", "category": "prepared", "resource": "Prepared hot meals", "unit": "meal", "perishable": true },
+  { "resource_id": "RES015", "category": "household", "resource": "Diapers", "unit": "pack", "perishable": false },
+  { "resource_id": "RES016", "category": "household", "resource": "Toiletry kits", "unit": "kit", "perishable": false }
+]

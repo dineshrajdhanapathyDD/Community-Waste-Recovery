@@ -1,0 +1,317 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Get Volunteer API",
+    "description": "API for querying volunteer driver information from the community logistics system",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "{apiGatewayUrl}",
+      "description": "API Gateway endpoint",
+      "variables": {
+        "apiGatewayUrl": {
+          "default": "https://api.example.com/dev"
+        }
+      }
+    }
+  ],
+  "paths": {
+    "/volunteers": {
+      "get": {
+        "summary": "Retrieve volunteer information",
+        "description": "Fetches volunteer driver data with optional filtering by volunteer ID, location, or name",
+        "operationId": "getVolunteers",
+        "parameters": [
+          {
+            "name": "volunteer_id",
+            "in": "query",
+            "description": "Filter by specific volunteer ID",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^VOL\\d{3}$",
+              "example": "VOL001"
+            }
+          },
+          {
+            "name": "location",
+            "in": "query",
+            "description": "Filter volunteers by location (uses LocationIndex GSI)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "Phoenix, 85043, AZ"
+            }
+          },
+          {
+            "name": "firstname",
+            "in": "query",
+            "description": "Filter volunteers by first name (partial match)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "John"
+            }
+          },
+          {
+            "name": "lastname",
+            "in": "query",
+            "description": "Filter volunteers by last name (partial match)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "Smith"
+            }
+          },
+          {
+            "name": "available",
+            "in": "query",
+            "description": "Show only volunteers currently available for pickups/deliveries",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "example": true
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of volunteers to return",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Volunteer data retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VolunteerResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No volunteers found matching the criteria",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/volunteers/{volunteer_id}": {
+      "get": {
+        "summary": "Retrieve specific volunteer by ID",
+        "description": "Fetches detailed information for a specific volunteer using primary key",
+        "operationId": "getVolunteerById",
+        "parameters": [
+          {
+            "name": "volunteer_id",
+            "in": "path",
+            "description": "Unique volunteer identifier",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^VOL\\d{3}$",
+              "example": "VOL001"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Volunteer data retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Volunteer"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid volunteer ID format",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Volunteer not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "VolunteerResponse": {
+        "type": "object",
+        "properties": {
+          "volunteers": {
+            "type": "array",
+            "description": "List of volunteers",
+            "items": {
+              "$ref": "#/components/schemas/Volunteer"
+            }
+          },
+          "count": {
+            "type": "integer",
+            "description": "Number of volunteers returned",
+            "example": 15
+          },
+          "filters_applied": {
+            "type": "object",
+            "description": "Filters that were applied to the query",
+            "properties": {
+              "volunteer_id": {
+                "type": "string"
+              },
+              "location": {
+                "type": "string"
+              },
+              "firstname": {
+                "type": "string"
+              },
+              "lastname": {
+                "type": "string"
+              },
+              "available": {
+                "type": "boolean"
+              }
+            }
+          },
+          "locations_summary": {
+            "type": "object",
+            "description": "Summary of volunteers by location",
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "example": {
+              "Phoenix, 85043, AZ": 3,
+              "Chicago, 60827, IL": 2
+            }
+          }
+        },
+        "required": ["volunteers", "count"]
+      },
+      "Volunteer": {
+        "type": "object",
+        "properties": {
+          "volunteer_id": {
+            "type": "string",
+            "description": "Unique volunteer identifier",
+            "pattern": "^VOL\\d{3}$",
+            "example": "VOL001"
+          },
+          "firstname": {
+            "type": "string",
+            "description": "Volunteer's first name",
+            "example": "John"
+          },
+          "lastname": {
+            "type": "string",
+            "description": "Volunteer's last name",
+            "example": "Smith"
+          },
+          "location": {
+            "type": "string",
+            "description": "Volunteer's home base in format: city, zip code, state",
+            "example": "Phoenix, 85043, AZ"
+          },
+          "joined_date": {
+            "type": "string",
+            "description": "Date the volunteer joined in dd-Month-yyyy format",
+            "pattern": "^\\d{2}-[A-Za-z]+-\\d{4}$",
+            "example": "15-March-2022"
+          },
+          "available": {
+            "type": "boolean",
+            "description": "Whether the volunteer is currently available for pickups/deliveries",
+            "example": true
+          },
+          "full_name": {
+            "type": "string",
+            "description": "Volunteer's full name (computed field)",
+            "example": "John Smith"
+          },
+          "years_of_service": {
+            "type": "number",
+            "description": "Years volunteering (computed field)",
+            "example": 2.5
+          }
+        },
+        "required": ["volunteer_id", "firstname", "lastname", "location", "joined_date"]
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "description": "Error message"
+          },
+          "message": {
+            "type": "string",
+            "description": "Detailed error description"
+          },
+          "code": {
+            "type": "string",
+            "description": "Error code"
+          }
+        },
+        "required": ["error"]
+      }
+    }
+  }
+}

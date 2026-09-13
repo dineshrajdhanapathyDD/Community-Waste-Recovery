@@ -1,0 +1,166 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Get Recipient Needs API",
+    "description": "API for querying what food banks, shelters, and partner organizations are currently requesting",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "{apiGatewayUrl}",
+      "description": "API Gateway endpoint"
+    }
+  ],
+  "paths": {
+    "/needs": {
+      "get": {
+        "summary": "Retrieve recipient needs",
+        "description": "Fetches current requests posted by recipient organizations, with optional filtering by resource or organization",
+        "operationId": "getRecipientNeeds",
+        "security": [
+          {
+            "CognitoOAuth2": ["community/read"]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "resource_id",
+            "in": "query",
+            "description": "Filter needs by a specific resource ID",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "RES001"
+            }
+          },
+          {
+            "name": "org_id",
+            "in": "query",
+            "description": "Filter needs by a specific recipient organization ID",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "ORG001"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Recipient needs retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecipientNeedsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "CognitoOAuth2": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "OAuth2 Bearer token from Cognito"
+      }
+    },
+    "schemas": {
+      "RecipientNeedsResponse": {
+        "type": "object",
+        "properties": {
+          "needs": {
+            "type": "array",
+            "description": "List of recipient needs / requests",
+            "items": {
+              "$ref": "#/components/schemas/RecipientNeed"
+            }
+          },
+          "count": {
+            "type": "integer",
+            "description": "Number of needs returned",
+            "example": 5
+          }
+        }
+      },
+      "RecipientNeed": {
+        "type": "object",
+        "properties": {
+          "need_id": {
+            "type": "string",
+            "description": "Unique need identifier",
+            "example": "NEED001"
+          },
+          "org_id": {
+            "type": "string",
+            "description": "Recipient organization identifier",
+            "example": "ORG001"
+          },
+          "org_name": {
+            "type": "string",
+            "description": "Recipient organization name",
+            "example": "North Side Food Bank"
+          },
+          "resource_id": {
+            "type": "string",
+            "description": "Requested resource identifier",
+            "example": "RES001"
+          },
+          "resource_name": {
+            "type": "string",
+            "description": "Requested resource name",
+            "example": "Canned vegetables"
+          },
+          "quantity_needed": {
+            "type": "string",
+            "description": "Amount requested",
+            "example": "200 cans"
+          },
+          "priority": {
+            "type": "string",
+            "description": "Urgency of the need",
+            "enum": ["low", "normal", "high", "urgent"],
+            "example": "high"
+          },
+          "location": {
+            "type": "string",
+            "description": "Delivery location for the recipient organization",
+            "example": "500 Elm St, North Side"
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "description": "Error message"
+          }
+        }
+      }
+    }
+  }
+}

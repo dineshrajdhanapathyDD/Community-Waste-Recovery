@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<!--
+  Good Neighbor Agent - Community Waste Recovery
+  Frontend SPA. Talks to the AWS Bedrock AgentCore Runtime using a Cognito
+  JWT as a bearer token. Config comes from config.js (window.WORKSHOP_CONFIG).
+  MIT License - Copyright (c) 2026 Dineshraj Dhanapathy@DD
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Good Neighbor Agent — Community Waste Recovery</title>
+
+  <!-- marked: render the agent's Markdown (incl. tables) as HTML.
+       Cognito email-OTP sign-in uses the Cognito IDP HTTPS API directly
+       (see app.js), so no auth SDK is needed. -->
+  <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- ============================ HEADER ============================ -->
+    <header class="topbar">
+      <div class="brand">
+        <span class="logo">🌱</span>
+        <div>
+          <h1>Good Neighbor Agent</h1>
+          <p class="tagline">Community Waste Recovery</p>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <span id="mode-badge" class="badge badge-demo">Demo mode</span>
+        <button id="how-btn" class="ghost-btn" title="How it works">How it works</button>
+        <button id="logout-btn" class="ghost-btn hidden">Sign out</button>
+      </div>
+    </header>
+
+    <!-- ============================ LOGIN ============================ -->
+    <section id="login-view" class="view">
+      <div class="card login-card">
+        <h2>Sign in</h2>
+        <p class="muted">
+          Enter your email and we'll send you a one-time code. Identities
+          represent organizations (donor, recipient, coordinator) — the agent
+          filters the tools each org can see.
+        </p>
+
+        <!-- Step 1: email -> request a code -->
+        <form id="email-form">
+          <label>
+            Email
+            <input id="email" type="email" autocomplete="email"
+                   placeholder="you@organization.org" required />
+          </label>
+          <button type="submit" class="primary-btn" id="email-submit">Send code</button>
+        </form>
+
+        <!-- Step 2: enter the 6-digit code -->
+        <form id="otp-form" class="hidden">
+          <p class="muted small" id="otp-sent-to"></p>
+          <label>
+            One-time code
+            <input id="otp" type="text" inputmode="numeric" autocomplete="one-time-code"
+                   pattern="[0-9]*" maxlength="8" placeholder="123456" required />
+          </label>
+          <button type="submit" class="primary-btn" id="otp-submit">Verify &amp; sign in</button>
+          <button type="button" class="ghost-btn full" id="otp-back">Use a different email</button>
+        </form>
+
+        <p id="login-error" class="error hidden"></p>
+        <p class="muted small" id="login-demo-hint"></p>
+      </div>
+    </section>
+
+    <!-- ============================ CHAT ============================ -->
+    <section id="chat-view" class="view hidden">
+      <div class="chat-wrap">
+        <div id="messages" class="messages"></div>
+        <form id="chat-form" class="composer">
+          <textarea id="chat-input" rows="1"
+            placeholder="e.g. A grocer has 40 lbs of produce to pick up by Friday — which food bank needs it, and who could drive it?"></textarea>
+          <button type="submit" class="primary-btn" id="send-btn">Send</button>
+        </form>
+        <div class="suggestions" id="suggestions"></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ==================== "HOW IT WORKS" MODAL ==================== -->
+  <div id="how-modal" class="modal hidden">
+    <div class="modal-body">
+      <button class="modal-close" id="how-close">×</button>
+      <h2>How this works</h2>
+      <p class="muted">Every message you send follows this path through AWS:</p>
+      <ol class="flow">
+        <li><b>Browser (this SPA)</b> — you sign in and type a question.</li>
+        <li><b>Amazon Cognito</b> — you enter your email, Cognito emails a one-time code, and verifying it returns a JWT access token that identifies your organization.</li>
+        <li><b>AgentCore Runtime</b> — the SPA calls <code>InvokeAgentRuntime</code> over HTTPS with the JWT as a Bearer token. A custom JWT authorizer validates it.</li>
+        <li><b>Strands agent (agent.py)</b> — runs Claude on Amazon Bedrock. It has no built-in knowledge; it only relays tool results.</li>
+        <li><b>AgentCore Gateway (MCP)</b> — the agent opens only the tool gateways your org is allowed to use.</li>
+        <li><b>Amazon Verified Permissions</b> — filters which tools your identity can access, per request.</li>
+        <li><b>Backend tools</b> — Lambda (guidelines, SigV4) and API-Gateway targets (surplus, catalog, needs, pantry, volunteers, vehicles) via OAuth2 minted by AgentCore Identity.</li>
+      </ol>
+      <div class="diagram">
+        <pre>
+ You ─▶ Cognito ─(JWT)─▶ AgentCore Runtime ─▶ Strands+Claude
+                                                   │
+                                          AgentCore Gateway (MCP)
+                                                   │
+                              ┌────────────────────┼─────────────────────┐
+                          Guidelines           Community              Logistics
+                          (Lambda, SigV4)   (surplus/catalog/needs)  (volunteers/
+                                             + Pantry (OAuth2 M2M)     vehicles)
+                                                   │
+                                    Amazon Verified Permissions (per-request filter)
+        </pre>
+      </div>
+      <p class="muted small">
+        Values come from <code>config.js</code>, generated at deploy time by
+        <code>launchAgent.sh</code> from the <code>bootstrap-stack</code> outputs.
+      </p>
+    </div>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

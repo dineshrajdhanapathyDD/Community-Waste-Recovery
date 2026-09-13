@@ -1,0 +1,9 @@
+[
+  { "org_id": "ORG001", "org_name": "North Side Food Bank", "role": "Recipient", "area": "North Side", "location": "500 Elm St, North Side", "contact": "intake@northsidefb.org" },
+  { "org_id": "ORG002", "org_name": "Hope Street Shelter", "role": "Recipient", "area": "North Side", "location": "88 Hope St, North Side", "contact": "frontdesk@hopestreet.org" },
+  { "org_id": "ORG003", "org_name": "Eastgate Community Pantry", "role": "Recipient", "area": "East Side", "location": "210 Eastgate Ave, East Side", "contact": "pantry@eastgate.org" },
+  { "org_id": "ORG004", "org_name": "Riverside Grocery", "role": "Donor", "area": "North Side", "location": "1200 River Rd, North Side", "contact": "sarah.johnson@riverside.example" },
+  { "org_id": "ORG005", "org_name": "Corner Bakehouse", "role": "Donor", "area": "Downtown", "location": "45 Market St, Downtown", "contact": "manager@cornerbakehouse.example" },
+  { "org_id": "ORG006", "org_name": "Lincoln Middle School Cafeteria", "role": "Donor", "area": "West Side", "location": "700 Lincoln Way, West Side", "contact": "nutrition@lincolnms.example" },
+  { "org_id": "ORG007", "org_name": "Community Coordinators Collective", "role": "Coordinator", "area": "Citywide", "location": "1 Civic Plaza, Downtown", "contact": "dispatch@goodneighbor.example" }
+]

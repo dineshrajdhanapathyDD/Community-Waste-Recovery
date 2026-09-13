@@ -1,0 +1,384 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Get Vehicle API",
+    "description": "API for querying vehicle information used for community pickups and deliveries",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "{apiGatewayUrl}",
+      "description": "API Gateway endpoint",
+      "variables": {
+        "apiGatewayUrl": {
+          "default": "https://api.example.com/dev"
+        }
+      }
+    }
+  ],
+  "paths": {
+    "/vehicles": {
+      "get": {
+        "summary": "Retrieve vehicle information",
+        "description": "Fetches vehicle data with optional filtering by vehicle ID, location, capacity, or type",
+        "operationId": "getVehicles",
+        "parameters": [
+          {
+            "name": "vehicle_id",
+            "in": "query",
+            "description": "Filter by specific vehicle ID",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^VEH\\d{3}$",
+              "example": "VEH001"
+            }
+          },
+          {
+            "name": "location",
+            "in": "query",
+            "description": "Filter vehicles by location (uses LocationIndex GSI)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "Phoenix, 85043, AZ"
+            }
+          },
+          {
+            "name": "capacity",
+            "in": "query",
+            "description": "Filter vehicles by capacity (uses CapacityIndex GSI)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["car", "van", "box truck"],
+              "example": "van"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "description": "Filter vehicles by type (partial match)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "refrigerated"
+            }
+          },
+          {
+            "name": "checked_after",
+            "in": "query",
+            "description": "Filter vehicles with a safety check after this date (dd-Month-yyyy format)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{2}-[A-Za-z]+-\\d{4}$",
+              "example": "01-January-2024"
+            }
+          },
+          {
+            "name": "checked_before",
+            "in": "query",
+            "description": "Filter vehicles with a safety check before this date (dd-Month-yyyy format)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{2}-[A-Za-z]+-\\d{4}$",
+              "example": "31-December-2024"
+            }
+          },
+          {
+            "name": "maintenance_due",
+            "in": "query",
+            "description": "Show only vehicles due for maintenance (check older than specified days)",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 365,
+              "example": 90
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of vehicles to return",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Vehicle data retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VehicleResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No vehicles found matching the criteria",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/vehicles/{vehicle_id}": {
+      "get": {
+        "summary": "Retrieve specific vehicle by ID",
+        "description": "Fetches detailed information for a specific vehicle using primary key",
+        "operationId": "getVehicleById",
+        "parameters": [
+          {
+            "name": "vehicle_id",
+            "in": "path",
+            "description": "Unique vehicle identifier",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^VEH\\d{3}$",
+              "example": "VEH001"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Vehicle data retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Vehicle"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid vehicle ID format",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Vehicle not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "VehicleResponse": {
+        "type": "object",
+        "properties": {
+          "vehicles": {
+            "type": "array",
+            "description": "List of vehicles",
+            "items": {
+              "$ref": "#/components/schemas/Vehicle"
+            }
+          },
+          "count": {
+            "type": "integer",
+            "description": "Number of vehicles returned",
+            "example": 12
+          },
+          "filters_applied": {
+            "type": "object",
+            "description": "Filters that were applied to the query",
+            "properties": {
+              "vehicle_id": {
+                "type": "string"
+              },
+              "location": {
+                "type": "string"
+              },
+              "capacity": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              },
+              "checked_after": {
+                "type": "string"
+              },
+              "checked_before": {
+                "type": "string"
+              },
+              "maintenance_due": {
+                "type": "integer"
+              }
+            }
+          },
+          "summary": {
+            "type": "object",
+            "description": "Summary statistics",
+            "properties": {
+              "by_location": {
+                "type": "object",
+                "description": "Vehicle count by location",
+                "additionalProperties": {
+                  "type": "integer"
+                },
+                "example": {
+                  "Phoenix, 85043, AZ": 2,
+                  "Chicago, 60827, IL": 3
+                }
+              },
+              "by_capacity": {
+                "type": "object",
+                "description": "Vehicle count by capacity",
+                "additionalProperties": {
+                  "type": "integer"
+                },
+                "example": {
+                  "car": 4,
+                  "van": 6,
+                  "box truck": 2
+                }
+              },
+              "by_type": {
+                "type": "object",
+                "description": "Vehicle count by type",
+                "additionalProperties": {
+                  "type": "integer"
+                },
+                "example": {
+                  "refrigerated": 3,
+                  "standard": 9
+                }
+              },
+              "maintenance_due_count": {
+                "type": "integer",
+                "description": "Number of vehicles due for maintenance",
+                "example": 2
+              }
+            }
+          }
+        },
+        "required": ["vehicles", "count"]
+      },
+      "Vehicle": {
+        "type": "object",
+        "properties": {
+          "vehicle_id": {
+            "type": "string",
+            "description": "Unique vehicle identifier",
+            "pattern": "^VEH\\d{3}$",
+            "example": "VEH001"
+          },
+          "type": {
+            "type": "string",
+            "description": "Vehicle type (e.g. standard, refrigerated)",
+            "example": "refrigerated"
+          },
+          "capacity": {
+            "type": "string",
+            "description": "Vehicle carrying capacity class",
+            "enum": ["car", "van", "box truck"],
+            "example": "van"
+          },
+          "location": {
+            "type": "string",
+            "description": "Vehicle's current location in format: city, zip code, state",
+            "example": "Phoenix, 85043, AZ"
+          },
+          "last_safety_check": {
+            "type": "string",
+            "description": "Date of last safety check in dd-Month-yyyy format",
+            "pattern": "^\\d{2}-[A-Za-z]+-\\d{4}$",
+            "example": "22-September-2024"
+          },
+          "days_since_check": {
+            "type": "integer",
+            "description": "Days since last safety check (computed field)",
+            "example": 45
+          },
+          "maintenance_status": {
+            "type": "string",
+            "description": "Maintenance status based on last check date (computed field)",
+            "enum": ["current", "due_soon", "overdue"],
+            "example": "current"
+          },
+          "next_check_due": {
+            "type": "string",
+            "description": "Estimated next check due date (computed field)",
+            "example": "22-March-2025"
+          }
+        },
+        "required": ["vehicle_id", "type", "capacity", "location", "last_safety_check"]
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "description": "Error message"
+          },
+          "message": {
+            "type": "string",
+            "description": "Detailed error description"
+          },
+          "code": {
+            "type": "string",
+            "description": "Error code"
+          }
+        },
+        "required": ["error"]
+      }
+    }
+  }
+}

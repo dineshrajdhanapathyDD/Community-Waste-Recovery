@@ -1,0 +1,70 @@
+[
+  {
+    "listing_id": "LIST12AB34CD",
+    "donor_name": "Riverside Grocery",
+    "posted_at": "2026-09-11T14:30:00.000Z",
+    "pickup_by": "2026-09-12T18:00:00.000Z",
+    "category": "produce",
+    "quantity": "40 lbs",
+    "location": "1200 River Rd, North Side",
+    "posted_by": "sarah.johnson",
+    "items": [
+      { "resource_id": "RES001", "quantity": "25 lbs", "best_before": "2026-09-13" },
+      { "resource_id": "RES004", "quantity": "15 lbs", "best_before": "2026-09-14" }
+    ]
+  },
+  {
+    "listing_id": "LIST56EF78GH",
+    "donor_name": "Corner Bakehouse",
+    "posted_at": "2026-09-12T20:15:00.000Z",
+    "pickup_by": "2026-09-13T10:00:00.000Z",
+    "category": "bakery",
+    "quantity": "60 items",
+    "location": "45 Market St, Downtown",
+    "posted_by": "manager",
+    "items": [
+      { "resource_id": "RES005", "quantity": "30 loaves", "best_before": "2026-09-13" },
+      { "resource_id": "RES006", "quantity": "30 items", "best_before": "2026-09-13" }
+    ]
+  },
+  {
+    "listing_id": "LIST90IJ12KL",
+    "donor_name": "Lincoln Middle School Cafeteria",
+    "posted_at": "2026-09-12T13:00:00.000Z",
+    "pickup_by": "2026-09-12T16:00:00.000Z",
+    "category": "prepared",
+    "quantity": "50 meals",
+    "location": "700 Lincoln Way, West Side",
+    "posted_by": "nutrition",
+    "items": [
+      { "resource_id": "RES014", "quantity": "50 meals", "best_before": "2026-09-12" }
+    ]
+  },
+  {
+    "listing_id": "LIST34MN56OP",
+    "donor_name": "Riverside Grocery",
+    "posted_at": "2026-09-10T09:45:00.000Z",
+    "pickup_by": "2026-09-15T18:00:00.000Z",
+    "category": "canned",
+    "quantity": "300 cans",
+    "location": "1200 River Rd, North Side",
+    "posted_by": "sarah.johnson",
+    "items": [
+      { "resource_id": "RES009", "quantity": "150 cans", "best_before": "2027-06-01" },
+      { "resource_id": "RES011", "quantity": "150 cans", "best_before": "2027-08-01" }
+    ]
+  },
+  {
+    "listing_id": "LIST78QR90ST",
+    "donor_name": "Corner Bakehouse",
+    "posted_at": "2026-09-12T21:00:00.000Z",
+    "pickup_by": "2026-09-13T09:00:00.000Z",
+    "category": "dairy",
+    "quantity": "24 gallons",
+    "location": "45 Market St, Downtown",
+    "posted_by": "manager",
+    "items": [
+      { "resource_id": "RES007", "quantity": "24 gallons", "best_before": "2026-09-16" }
+    ]
+  }
+]
