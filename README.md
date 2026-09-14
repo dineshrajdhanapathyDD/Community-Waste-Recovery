@@ -15,10 +15,20 @@ in and chat with it.
 > agent "what are the current pantry stock levels?" and it returns a table built
 > from real backend data.
 
+## Links
+
+- **Live app:** <https://main.dfwth112aeze8.amplifyapp.com/>
+- **Source code:** <https://github.com/dineshrajdhanapathyDD/Community-Waste-Recovery>
+- **Project writeup:** [`docs/ABOUT.md`](docs/ABOUT.md) (inspiration, build, challenges, testing)
+
+> The live app runs the frontend on AWS Amplify. Sign in with an email and the
+> one-time code to try it. (In demo mode, use code `123456`.)
+
 ---
 
 ## Table of contents
 
+- [Links](#links)
 - [Architecture](#architecture)
 - [What it can do](#what-it-can-do)
 - [Repository layout](#repository-layout)
@@ -32,6 +42,7 @@ in and chat with it.
 - [Deployed resources (this account)](#deployed-resources-this-account)
 - [How the agent works](#how-the-agent-works)
 - [Configuration reference](#configuration-reference)
+- [Observability](#observability)
 - [Troubleshooting](#troubleshooting)
 - [Teardown](#teardown)
 - [License](#license)
@@ -366,6 +377,39 @@ IAM permissions the wiring requires (each otherwise surfaces as
 - **Gateway role** (`AgentCoreGatewayExecutionRole`):
   `bedrock-agentcore:GetWorkloadAccessToken` + `GetResourceApiKey` — see
   [`gateway/gateway-workload-policy.json`](static/AgentCode/gateway/gateway-workload-policy.json).
+
+---
+
+## Observability
+
+Every layer logs to **Amazon CloudWatch**. Log groups:
+
+| Component | CloudWatch log group |
+|-----------|----------------------|
+| AgentCore Runtime | `/aws/bedrock-agentcore/runtimes/good_neighbor_agent-<id>-DEFAULT` |
+| AgentCore Gateway | `/aws/vendedlogs/bedrock-agentcore/gateway/APPLICATION_LOGS/goodneighborgateway-<id>` |
+| Backend Lambda | `/aws/lambda/good-neighbor-backend` |
+| Container build | CodeBuild build logs (per `agentcore deploy`) |
+
+Tail the agent live while invoking it:
+
+```bash
+aws logs tail /aws/bedrock-agentcore/runtimes/good_neighbor_agent-<id>-DEFAULT \
+  --region us-east-1 --follow
+```
+
+The runtime log shows tool registration, each tool call, the model response, and
+full tracebacks — this is where the auth-chain `AccessDenied` errors surfaced.
+The gateway log is where a tool call can show HTTP 200 while the body is an
+"unable to fetch outbound api key" error (missing gateway permission).
+
+Tracing is off by default: the runtime is deployed with `--disable-otel` and the
+gateway's X-Ray trace delivery is left disabled (logs are enough to operate it).
+Enabling OpenTelemetry / X-Ray is a one-flag change for deeper request tracing.
+
+> Tip: to inspect a tool result without the model, run
+> [`gateway/probe_tool.py`](static/AgentCode/gateway/probe_tool.py) — logs tell
+> you *where* a request broke, the probe tells you *what* the gateway returned.
 
 ---
 
